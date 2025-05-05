@@ -1,0 +1,25 @@
+/* Pastikan menu sidebar terlihat */
+.sidenav .nav-link {
+    display: flex !important; /* Pastikan elemen tetap terlihat */
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    color: #344767 !important; /* Warna teks default */
+    font-weight: 500;
+    opacity: 1 !important; /* Pastikan elemen tidak transparan */
+    visibility: visible !important; /* Pastikan elemen terlihat */
+    transition: all 0.3s ease;
+}
+
+/* Gaya untuk menu saat di-hover */
+.sidenav .nav-link:hover {
+    background-color: #f0f2f5 !important; /* Warna latar belakang saat di-hover */
+    color: #344767 !important; /* Warna teks saat di-hover */
+}
+
+/* Gaya untuk menu yang aktif */
+.sidenav .nav-link.active {
+    background-color: #344767 !important; /* Warna latar belakang menu aktif */
+    color: #fff !important; /* Warna teks menu aktif */
+    font-weight: bold !important;
+}
