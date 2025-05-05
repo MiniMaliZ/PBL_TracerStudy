@@ -32,6 +32,9 @@
     <script src="{{ asset('material-dashboard-master/assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
     <script src="{{ asset('material-dashboard-master/assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
     <script src="{{ asset('material-dashboard-master/assets/js/material-dashboard.min.js?v=3.2.0') }}"></script>
+    <script src="{{ asset('material-dashboard-master/assets/js/plugins/chartjs.min.js') }}"></script>
+
+    @yield('scripts')
 </body>
 
 </html>
