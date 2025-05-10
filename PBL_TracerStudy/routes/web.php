@@ -21,6 +21,23 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+//form
+Route::get('/lp', function () {
+    return view('FormTracerStudy/index');
+});
+
+Route::get('/opsi', function () {
+    return view('FormTracerStudy/opsiform');
+});
+
+Route::get('/ts', function () {
+    return view('FormTracerStudy/tracerstudy');
+});
+
+Route::get('/tspl', function () {
+    return view('FormTracerStudy/surveiPL');
+});
+
 // Tambahkan route untuk dashboard
 Route::get('/dashboard', function () {
     return view('admin.dashboard'); // Pastikan file ini ada
