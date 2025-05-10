@@ -11,16 +11,15 @@ class PertanyaanController extends Controller
     // Menampilkan data dalam tabel
     public function index()
     {
-        // Ambil data pertanyaan beserta relasi admin
         $pertanyaan = Pertanyaan::with('admin')->get();
-        return view('admin.tables', compact('pertanyaan'));
+        return view('admin.Pertanyaan.indexPertanyaan', compact('pertanyaan')); // Sesuaikan path
     }
 
     // Menampilkan form untuk tambah data
     public function create()
     {
-        $admins = Admin::all(); // Ambil semua admin untuk dropdown
-        return view('admin.create', compact('admins'));
+        $admins = Admin::all();
+        return view('admin.Pertanyaan.createPertanyaan', compact('admins')); // Sesuaikan path
     }
 
     // Menyimpan data baru
@@ -40,8 +39,8 @@ class PertanyaanController extends Controller
     // Menampilkan form untuk edit data
     public function edit($id)
     {
-        $pertanyaan = Pertanyaan::findOrFail($id); // Cari data berdasarkan ID
-        return view('admin.edit', compact('pertanyaan'));
+        $pertanyaan = Pertanyaan::findOrFail($id);
+        return view('admin.Pertanyaan.editPertanyaan', compact('pertanyaan')); // Sesuaikan path
     }
 
     // Memperbarui data

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AlumniController;
 
 use App\Http\Controllers\PertanyaanController;
 
@@ -32,3 +33,11 @@ Route::post('/pertanyaan', [PertanyaanController::class, 'store'])->name('pertan
 Route::get('/pertanyaan/{id}/edit', [PertanyaanController::class, 'edit'])->name('pertanyaan.edit');
 Route::put('/pertanyaan/{id}', [PertanyaanController::class, 'update'])->name('pertanyaan.update');
 Route::delete('/pertanyaan/{id}', [PertanyaanController::class, 'destroy'])->name('pertanyaan.destroy');
+
+// Route::resource('alumni', AlumniController::class);// Routes untuk tabel Alumni
+Route::get('/alumni', [AlumniController::class, 'index'])->name('alumni.index');
+Route::get('/alumni/create', [AlumniController::class, 'create'])->name('alumni.create');
+Route::post('/alumni', [AlumniController::class, 'store'])->name('alumni.store');
+Route::get('/alumni/{nim}/edit', [AlumniController::class, 'edit'])->name('alumni.edit');
+Route::put('/alumni/{nim}', [AlumniController::class, 'update'])->name('alumni.update');
+Route::delete('/alumni/{nim}', [AlumniController::class, 'destroy'])->name('alumni.destroy');

@@ -26,6 +26,13 @@
                     <span class="nav-link-text ms-1">Pertanyaan</span>
                 </a>
             </li>
+            <<li class="nav-item">
+                <a class="nav-link {{ Request::is('alumni*') ? 'active bg-gradient-dark text-white' : '' }}"
+                    href="{{ route('alumni.index') }}">
+                    <i class="material-symbols-rounded opacity-5">school</i>
+                    <span class="nav-link-text ms-1">Alumni</span>
+                </a>
+            </li>
         </ul>
     </div>
 </aside>
