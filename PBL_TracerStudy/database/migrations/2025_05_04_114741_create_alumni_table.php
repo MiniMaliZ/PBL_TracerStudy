@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('prodi', 100);
             $table->string('no_hp', 20);
             $table->string('email', 100);
+            $table->year('tahun_masuk');
             $table->date('tgl_lulus');
             $table->year('tahun_lulus');
             $table->date('tanggal_kerja_pertama')->nullable();

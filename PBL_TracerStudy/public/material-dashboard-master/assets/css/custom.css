@@ -23,3 +23,24 @@
     color: #fff !important; /* Warna teks menu aktif */
     font-weight: bold !important;
 }
+
+/* Pastikan elemen textarea terlihat */
+textarea.form-control,
+select.form-control {
+    border: 1px solid #d2d6da; /* Warna border */
+    border-radius: 5px; /* Radius untuk sudut */
+    padding: 10px; /* Padding dalam elemen */
+    font-size: 14px; /* Ukuran font */
+    color: #344767; /* Warna teks */
+    background-color: #fff; /* Warna latar belakang */
+    box-shadow: none; /* Hilangkan shadow default */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Gaya saat elemen aktif (focus) */
+textarea.form-control:focus,
+select.form-control:focus {
+    border-color: #344767; /* Warna border saat aktif */
+    box-shadow: 0 0 5px rgba(52, 71, 103, 0.5); /* Shadow saat aktif */
+    outline: none; /* Hilangkan outline default */
+}
