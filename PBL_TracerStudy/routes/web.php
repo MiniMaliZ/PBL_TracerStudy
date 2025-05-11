@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AlumniController;
 
 use App\Http\Controllers\PertanyaanController;
 
@@ -21,8 +22,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-
 // Tambahkan route untuk dashboard
 Route::get('/dashboard', function () {
     return view('admin.dashboard'); // Pastikan file ini ada
@@ -35,19 +34,10 @@ Route::get('/pertanyaan/{id}/edit', [PertanyaanController::class, 'edit'])->name
 Route::put('/pertanyaan/{id}', [PertanyaanController::class, 'update'])->name('pertanyaan.update');
 Route::delete('/pertanyaan/{id}', [PertanyaanController::class, 'destroy'])->name('pertanyaan.destroy');
 
-//form
-Route::get('/lp', function () {
-    return view('FormTracerStudy/index');
-});
-
-Route::get('/opsi', function () {
-    return view('FormTracerStudy/opsiform');
-});
-
-Route::get('/ts', function () {
-    return view('FormTracerStudy/tracerstudy');
-});
-
-Route::get('/tspl', function () {
-    return view('FormTracerStudy/surveiPL');
-});
+// Route::resource('alumni', AlumniController::class);// Routes untuk tabel Alumni
+Route::get('/alumni', [AlumniController::class, 'index'])->name('alumni.index');
+Route::get('/alumni/create', [AlumniController::class, 'create'])->name('alumni.create');
+Route::post('/alumni', [AlumniController::class, 'store'])->name('alumni.store');
+Route::get('/alumni/{nim}/edit', [AlumniController::class, 'edit'])->name('alumni.edit');
+Route::put('/alumni/{nim}', [AlumniController::class, 'update'])->name('alumni.update');
+Route::delete('/alumni/{nim}', [AlumniController::class, 'destroy'])->name('alumni.destroy');

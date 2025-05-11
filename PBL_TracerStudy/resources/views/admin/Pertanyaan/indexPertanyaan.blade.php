@@ -1,4 +1,3 @@
-{{-- filepath: c:\laragon\www\PBL_TracerStudy\PBL_TracerStudy\resources\views\admin\tables.blade.php --}}
 @extends('layouts.template')
 
 @section('title', 'Pertanyaan')
