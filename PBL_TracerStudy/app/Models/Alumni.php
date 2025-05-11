@@ -21,20 +21,21 @@ class Alumni extends Model
         'no_hp',
         'email',
         'tahun_masuk',
-        'tahun_lulus',
         'tgl_lulus',
         'tanggal_kerja_pertama',
         'masa_tunggu',
         'tanggal_mulai_instansi',
-        'jenis_instansi',
-        'nama_instansi',
-        'skala_instansi',
-        'lokasi_instansi',
         'kategori_profesi',
         'profesi',
-        'nama_atasan',
-        'jabatan_atasan',
-        'no_hp_atasan',
-        'email_atasan',
+        'id_pengguna_lulusan', // Foreign key ke tabel pengguna_lulusan
     ];
+
+    /**
+     * Relasi ke tabel pengguna_lulusan
+     * Satu alumni memiliki satu pengguna lulusan
+     */
+    public function penggunaLulusan()
+    {
+        return $this->belongsTo(PenggunaLulusan::class, 'id_pengguna_lulusan', 'id_pengguna_lulusan');
+    }
 }

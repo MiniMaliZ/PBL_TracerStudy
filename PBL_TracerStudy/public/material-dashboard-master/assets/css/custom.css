@@ -44,3 +44,56 @@ select.form-control:focus {
     box-shadow: 0 0 5px rgba(52, 71, 103, 0.5); /* Shadow saat aktif */
     outline: none; /* Hilangkan outline default */
 }
+
+/* Batasi lebar tabel agar kolom tidak terlalu lebar */
+.table th {
+    font-weight: bold;
+    text-align: center;
+}
+
+.table td {
+    text-align: left;
+    overflow-x: visible !important; /* Tampilkan teks penuh saat hover */
+    white-space: normal !important; /* Izinkan teks meluas ke baris baru */
+    position: relative !important; /* Pastikan teks tetap di dalam tabel */
+    z-index: 1 !important; /* Pastikan teks berada di atas elemen lain */
+    background-color: #f8f9fa !important; /* Tambahkan latar belakang untuk keterbacaan */
+}
+
+/* Pastikan semua input memiliki border dan terlihat */
+input.form-control,
+textarea.form-control,
+select.form-control {
+    border: 1px solid #d2d6da !important; /* Warna border */
+    border-radius: 5px !important; /* Radius untuk sudut */
+    padding: 10px !important; /* Padding dalam elemen */
+    font-size: 14px !important; /* Ukuran font */
+    color: #344767 !important; /* Warna teks */
+    background-color: #fff !important; /* Warna latar belakang */
+    box-shadow: none !important; /* Hilangkan shadow default */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Gaya saat elemen aktif (focus) */
+input.form-control:focus,
+textarea.form-control:focus,
+select.form-control:focus {
+    border-color: #344767 !important; /* Warna border saat aktif */
+    box-shadow: 0 0 5px rgba(52, 71, 103, 0.5) !important; /* Shadow saat aktif */
+    outline: none !important; /* Hilangkan outline default */
+}
+
+/* Pastikan tombol terlihat */
+button.btn {
+    border-radius: 5px !important; /* Radius untuk sudut */
+    padding: 10px 20px !important; /* Padding dalam tombol */
+    font-size: 14px !important; /* Ukuran font */
+    font-weight: bold !important; /* Tebal font */
+    transition: background-color 0.3s ease, color 0.3s ease !important;
+}
+
+/* Pastikan tombol saat hover */
+button.btn:hover {
+    background-color: #344767 !important; /* Warna latar belakang saat hover */
+    color: #fff !important; /* Warna teks saat hover */
+}
