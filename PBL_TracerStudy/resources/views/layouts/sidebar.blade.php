@@ -33,6 +33,13 @@
                     <span class="nav-link-text ms-1">Alumni</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin*') ? 'active bg-gradient-dark text-white' : '' }}"
+                    href="{{ route('admin.index') }}">
+                    <i class="material-symbols-rounded opacity-5">admin_panel_settings</i>
+                    <span class="nav-link-text ms-1">Admin</span>
+                </a>
+            </li>
         </ul>
     </div>
 </aside>

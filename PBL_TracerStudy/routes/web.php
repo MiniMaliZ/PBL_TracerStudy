@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AlumniController;
 
 use App\Http\Controllers\PertanyaanController;
@@ -41,3 +42,11 @@ Route::post('/alumni', [AlumniController::class, 'store'])->name('alumni.store')
 Route::get('/alumni/{nim}/edit', [AlumniController::class, 'edit'])->name('alumni.edit');
 Route::put('/alumni/{nim}', [AlumniController::class, 'update'])->name('alumni.update');
 Route::delete('/alumni/{nim}', [AlumniController::class, 'destroy'])->name('alumni.destroy');
+
+// Routes untuk tabel Admin
+Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+Route::get('/admin/create', [AdminController::class, 'create'])->name('admin.create');
+Route::post('/admin', [AdminController::class, 'store'])->name('admin.store');
+Route::get('/admin/{id}/edit', [AdminController::class, 'edit'])->name('admin.edit');
+Route::put('/admin/{id}', [AdminController::class, 'update'])->name('admin.update');
+Route::delete('/admin/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
