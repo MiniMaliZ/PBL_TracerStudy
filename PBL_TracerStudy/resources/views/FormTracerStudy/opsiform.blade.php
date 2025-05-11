@@ -148,7 +148,7 @@
             <h5>Alumni</h5>
             <p style="margin-bottom: 35px; ">Pengguna yang telah lulus dari institusi dan mengisi form untuk memberikan informasi terkait pekerjaan,
                 studi lanjutan, dan pengalaman pasca-kelulusan.</p>
-            <button class="btn-formulir">Isi Formulir</button>
+            <a class="btn-formulir btn btn-fill-form mb-5" href="/ts">Isi Formulir</a>
         </div>
 
         <!-- Card 2: Pengguna Lulusan -->
@@ -157,7 +157,7 @@
             <h5>Pengguna Lulusan</h5>
             <p>Pihak eksternal seperti perusahaan atau instansi yang mempekerjakan lulusan, bertujuan memberikan
                 penilaian terhadap kompetensi dan kinerja lulusan di tempat kerja.</p>
-            <button class="btn-formulir">Isi Formulir</button>
+            <a class="btn-formulir btn btn-fill-form mb-5" href="/tspl">Isi Formulir</a>
         </div>
     </div>
 

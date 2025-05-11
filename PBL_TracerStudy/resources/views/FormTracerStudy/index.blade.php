@@ -315,9 +315,9 @@
                 <div class="row py-4">
                     <!-- Logo dan Judul -->
                     <div class="col-md-4 mb-4">
-                        <div class="d-flex align-items-center mb-3">
+                        <div class="d-flex align-items-center mb-3" style="gap: 10px; margin: 0; padding: 0;">
                             <img src="{{ asset('landingpageimg/3186eafb-bdc8-461c-93ef-b3ac617a517c 3.png') }}"
-                                alt="Politeknik Negeri Malang Logo" class="me-3" style="width: 70px; height: 70px;">
+                                alt="Politeknik Negeri Malang Logo" style="width: 90px; height: 90px;">
                             <div>
                                 <div class="fw-bold" style="font-size: 18px;">Tracer Study</div>
                                 <div>Politeknik Negeri Malang</div>

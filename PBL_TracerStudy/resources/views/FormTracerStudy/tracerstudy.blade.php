@@ -53,13 +53,13 @@
 <body>
 
     <header class="container d-flex align-items-center py-2 border-bottom">
-        <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}"> 
+        <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}">
         <div style="line-height: 1.2;">
             <h3 class="mb-0" style="font-size: 20px;">TRACER STUDY</h3>
             <p class="mb-0" style="font-size: 14px;">Politeknik Negeri Malang</p>
         </div>
     </header>
-    
+
     <main class="container my-5">
         <form action="" method="POST">
             <h1 class="mb-4">Formulir</h1>
@@ -70,27 +70,42 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="nim" class="form-label">NIM</label>
-                        <input type="text" class="form-control" id="nim" name="nim" placeholder="NIM" required>
+                        <input type="text" class="form-control" id="nim" name="nim" placeholder="NIM"
+                            required>
                     </div>
                     <div class="col-md-6">
                         <label for="nama_alumni" class="form-label">Nama</label>
-                        <input type="text" class="form-control" id="nama_alumni" name="nama_alumni" placeholder="Nama" required>
+                        <input type="text" class="form-control" id="nama_alumni" name="nama_alumni"
+                            placeholder="Nama" required>
                     </div>
                     <div class="col-md-6">
                         <label for="prodi" class="form-label">Program Studi</label>
-                        <input type="text" class="form-control" id="prodi" name="prodi" placeholder="Program Studi" required>
+                        <input type="text" class="form-control" id="prodi" name="prodi"
+                            placeholder="Program Studi" required>
                     </div>
                     <div class="col-md-6">
                         <label for="tgl_lulus" class="form-label">Tanggal Lulus</label>
                         <input type="date" class="form-control" id="tgl_lulus" name="tgl_lulus" required>
                     </div>
                     <div class="col-md-6">
+                        <label for="tahun_masuk" class="form-label">Tahun Angkatan</label>
+                        <input type="number" class="form-control" id="tahun_masuk" name="tahun_masuk"
+                            placeholder="Angkatan" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="tanggal_kerja_pertama" class="form-label">Tanggal Pertama Bekerja</label>
+                        <input type="date" class="form-control" id="tanggal_kerja_pertama"
+                            name="tanggal_kerja_pertama" placeholder="DD/MM/YYYY" required>
+                    </div>
+                    <div class="col-md-6">
                         <label for="email" class="form-label">Email</label>
-                        <input type="text" class="form-control" id="email" name="email" placeholder="Email" required>
+                        <input type="text" class="form-control" id="email" name="email" placeholder="Email"
+                            required>
                     </div>
                     <div class="col-md-6">
                         <label for="no_hp" class="form-label">No. HP</label>
-                        <input type="text" class="form-control" id="no_hp" name="no_hp" placeholder="No HP" required>
+                        <input type="text" class="form-control" id="no_hp" name="no_hp" placeholder="No HP"
+                            required>
                     </div>
                 </div>
             </div>
@@ -105,7 +120,13 @@
                     </div>
                     <div class="col-md-6">
                         <label for="jenis_instansi" class="form-label">Jenis Instansi</label>
-                        <input type="text" class="form-control" id="jenis_instansi" name="jenis_instansi" required>
+                        <select class="form-select" id="jenis_instansi" name="jenis_instansi" required>
+                            <option value="" disabled selected>Pilih...</option>
+                            <option value="pendidikan_tinggi">Pendidikan tinggi</option>
+                            <option value="instansi_pemerintah">Instansi Pemerintah</option>
+                            <option value="bumn">BUMN</option>
+                            <option value="perusahaan_swasta">Perusahaan swasta</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
                         <label for="skala_instansi" class="form-label">Skala Instansi</label>
@@ -117,12 +138,14 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="tanggal_kerja_pertama" class="form-label">Tanggal Pertama Bekerja</label>
-                        <input type="text" class="form-control" id="tanggal_kerja_pertama" name="tanggal_kerja_pertama" placeholder="DD/MM/YYYY" required>
+                        <label for="tanggal_mulai_instansi" class="form-label">Tanggal Mulai Instansi</label>
+                        <input type="date" class="form-control" id="tanggal_mulai_instansi"
+                            name="tanggal_mulai_instansi" placeholder="DD/MM/YYYY" required>
                     </div>
                     <div class="col-md-6">
                         <label for="lokasi_instansi" class="form-label">Lokasi Instansi</label>
-                        <input type="text" class="form-control" id="lokasi_instansi" name="lokasi_instansi" required>
+                        <input type="text" class="form-control" id="lokasi_instansi" name="lokasi_instansi"
+                            required>
                     </div>
                     <div class="col-md-6">
                         <label for="kategori_profesi" class="form-label">Kategori Profesi</label>
@@ -156,8 +179,8 @@
                         <input type="text" class="form-control" id="email_atasan" name="email_atasan" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="nohp_atasan" class="form-label">No HP Atasan</label>
-                        <input type="text" class="form-control" id="nohp_atasan" name="nohp_atasan" required>
+                        <label for="notelpi" class="form-label">No telp Instansi</label>
+                        <input type="text" class="form-control" id="notelpi" name="notelpi" required>
                     </div>
                 </div>
             </div>
