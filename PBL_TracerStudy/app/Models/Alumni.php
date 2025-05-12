@@ -9,32 +9,39 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Alumni extends Model
 {
     use HasFactory;
+    protected $table = 'alumni'; // Nama tabel
+    protected $primaryKey = 'nim'; // Primary key
+    public $incrementing = false; // Karena primary key bukan auto-increment
+    public $timestamps = false; // Nonaktifkan timestamps
 
-    protected $table = 'alumni';
-    protected $primaryKey = 'nim'; 
-    public $incrementing = false; 
-    protected $keyType = 'string'; 
-    
-    protected $fillable = [
+    protected $fillable = [ 
         'nim',
-        'nama_alumni', 
-        'prodi', 
-        'no_hp', 
-        'email', 
+        'nama_alumni',
+        'prodi',
+        'no_hp',
+        'email',
+        'tahun_masuk',
         'tgl_lulus',
-        'tahun_lulus',
         'tanggal_kerja_pertama',
-        'masa_tunggu',
         'tanggal_mulai_instansi',
-        'jenis_instansi', 
-        'nama_instansi', 
-        'skala_instansi', 
-        'lokasi_instansi', 
+        'masa_tunggu',
         'kategori_profesi',
-        'profesi', 
-        'nama_atasan',
-        'jabatan_atasan', 
-        'no_hp_atasan', 
-        'email_atasan'
+        'profesi',
+        'id_pengguna_lulusan', // Foreign key ke tabel pengguna_lulusan
+        'id_instansi', // Foreign key ke tabel instansi
     ];
+
+    /**
+     * Relasi ke tabel pengguna_lulusan
+     * Satu alumni memiliki satu pengguna lulusan
+     */
+    public function penggunaLulusan()
+    {
+        return $this->belongsTo(PenggunaLulusan::class, 'id_pengguna_lulusan', 'id_pengguna_lulusan');
+    }
+
+    public function instansi()
+    {
+        return $this->belongsTo(Instansi::class, 'id_instansi', 'id_instansi');
+    }
 }

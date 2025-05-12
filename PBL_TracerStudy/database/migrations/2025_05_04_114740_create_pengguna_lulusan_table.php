@@ -8,12 +8,9 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('pengguna_lulusan', function (Blueprint $table) {
             $table->id('id_pengguna_lulusan');
-            $table->string('nama_pl', 100);
-            $table->string('instansi', 100);
-            $table->string('jabatan', 100);
-            $table->string('email', 100);
-            $table->string('nama_alumni', 100);
-            $table->string('nim', 20); // FK ke alumni
+            $table->string('nama_atasan', 100)->nullable(); // Nama atasan
+            $table->string('jabatan_atasan', 100)->nullable(); // Jabatan atasan
+            $table->string('email_atasan', 100)->nullable(); // Email atasan
         });
     }
 

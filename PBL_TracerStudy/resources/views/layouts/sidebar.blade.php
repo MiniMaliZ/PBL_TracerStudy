@@ -27,10 +27,17 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ Request::is('import*') ? 'active bg-gradient-dark text-white' : '' }}"
-                    href="{{ route('import.index') }}">
-                    <i class="material-symbols-rounded opacity-5">table_view</i>
-                    <span class="nav-link-text ms-1">Import</span>
+                <a class="nav-link {{ Request::is('alumni*') ? 'active bg-gradient-dark text-white' : '' }}"
+                    href="{{ route('alumni.index') }}">
+                    <i class="material-symbols-rounded opacity-5">school</i>
+                    <span class="nav-link-text ms-1">Alumni</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin*') ? 'active bg-gradient-dark text-white' : '' }}"
+                    href="{{ route('admin.index') }}">
+                    <i class="material-symbols-rounded opacity-5">admin_panel_settings</i>
+                    <span class="nav-link-text ms-1">Admin</span>
                 </a>
             </li>
         </ul>
