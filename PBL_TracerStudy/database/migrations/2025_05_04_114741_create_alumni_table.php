@@ -20,12 +20,19 @@ return new class extends Migration {
             $table->enum('kategori_profesi', ['Infokom','Non Infokom'])->nullable(); // Kategori profesi
             $table->string('profesi', 100)->nullable(); // Profesi
             $table->unsignedBigInteger('id_pengguna_lulusan')->nullable(); // Foreign key ke pengguna_lulusan
+            $table->unsignedBigInteger('id_instansi')->nullable(); // Foreign key ke pengguna_lulusan
+            
 
             // Relasi ke tabel pengguna_lulusan
             $table->foreign('id_pengguna_lulusan')
                 ->references('id_pengguna_lulusan')
                 ->on('pengguna_lulusan')
                 ->onDelete('set null'); // Jika pengguna_lulusan dihapus, set null
+
+            $table->foreign('id_instansi')
+                ->references('id_instansi')
+                ->on('instansi')
+                ->onDelete('set null'); // Jika id_instansi dihapus, set null
         });
     }
 

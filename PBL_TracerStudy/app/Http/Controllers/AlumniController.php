@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Alumni;
 use App\Models\PenggunaLulusan;
+use App\Models\Instansi;
 use Illuminate\Http\Request;
 
 class AlumniController extends Controller
@@ -11,7 +12,9 @@ class AlumniController extends Controller
     // Menampilkan data dalam tabel
     public function index()
     {
-        $alumni = Alumni::with('penggunaLulusan')->get(); // Ambil semua data alumni dengan relasi pengguna_lulusan
+        // Ambil semua data alumni dengan relasi penggunaLulusan dan instansi
+        $alumni = Alumni::with(['penggunaLulusan', 'instansi'])->get();
+
         return view('admin.Alumni.indexAlumni', compact('alumni'));
     }
 
@@ -26,30 +29,37 @@ class AlumniController extends Controller
     {
         $request->validate([
             'nim' => 'required|unique:alumni,nim',
-            'nama_alumni' => 'required',
-            'prodi' => 'required',
-            'email' => 'nullable|email',
-            'tgl_lulus' => 'nullable|date',
+            'nama_alumni' => 'required|max:100',
+            'prodi' => 'required|max:100',
+            'tgl_lulus' => 'required|date',
             'tanggal_kerja_pertama' => 'nullable|date',
+            'email' => 'nullable|email',
             'email_atasan' => 'nullable|email',
+            'nama_instansi' => 'nullable|max:100',
+            'jenis_instansi' => 'nullable|in:Pendidikan Tinggi,Instansi Pemerintah,BUMN,Perusahaan Swasta',
+            'skala_instansi' => 'nullable|in:Wirausaha,Nasional,Multinasional',
         ]);
 
-        // Cek apakah email_atasan sudah ada di tabel pengguna_lulusan
-        $penggunaLulusan = PenggunaLulusan::where('email_atasan', $request->email_atasan)->first();
-
-        if (!$penggunaLulusan) {
-            // Jika tidak ada, buat data pengguna_lulusan baru
-            $penggunaLulusan = PenggunaLulusan::create([
+        // Cek atau buat data pengguna_lulusan
+        $penggunaLulusan = PenggunaLulusan::updateOrCreate(
+            ['email_atasan' => $request->email_atasan], // Cari berdasarkan email_atasan
+            [
                 'nama_atasan' => $request->nama_atasan,
                 'jabatan_atasan' => $request->jabatan_atasan,
                 'email_atasan' => $request->email_atasan,
-                'nama_instansi' => $request->nama_instansi,
+            ]
+        );
+
+        // Cek atau buat data instansi
+        $instansi = Instansi::updateOrCreate(
+            ['nama_instansi' => $request->nama_instansi], // Cari berdasarkan nama_instansi
+            [
                 'jenis_instansi' => $request->jenis_instansi,
                 'skala_instansi' => $request->skala_instansi,
                 'lokasi_instansi' => $request->lokasi_instansi,
                 'no_hp_instansi' => $request->no_hp_instansi,
-            ]);
-        }
+            ]
+        );
 
         // Hitung masa tunggu (dalam bulan) berdasarkan tgl_lulus dan tanggal_kerja_pertama
         $masaTunggu = null;
@@ -73,6 +83,7 @@ class AlumniController extends Controller
             'kategori_profesi' => $request->kategori_profesi,
             'profesi' => $request->profesi,
             'id_pengguna_lulusan' => $penggunaLulusan->id_pengguna_lulusan,
+            'id_instansi' => $instansi->id_instansi,
         ]);
 
         return redirect()->route('alumni.index')->with('success', 'Data alumni berhasil ditambahkan.');
@@ -81,7 +92,9 @@ class AlumniController extends Controller
     // Menampilkan form untuk edit data
     public function edit($nim)
     {
-        $alumni = Alumni::with('penggunaLulusan')->findOrFail($nim);
+        // Ambil data alumni berdasarkan nim dengan relasi penggunaLulusan dan instansi
+        $alumni = Alumni::with(['penggunaLulusan', 'instansi'])->findOrFail($nim);
+
         return view('admin.Alumni.editAlumni', compact('alumni'));
     }
 
@@ -89,32 +102,39 @@ class AlumniController extends Controller
     public function update(Request $request, $nim)
     {
         $request->validate([
-            'nama_alumni' => 'required',
-            'prodi' => 'required',
-            'email' => 'nullable|email',
-            'tgl_lulus' => 'nullable|date',
+            'nama_alumni' => 'required|max:100',
+            'prodi' => 'required|max:100',
+            'tgl_lulus' => 'required|date',
             'tanggal_kerja_pertama' => 'nullable|date',
+            'email' => 'nullable|email',
             'email_atasan' => 'nullable|email',
+            'nama_instansi' => 'nullable|max:100',
+            'jenis_instansi' => 'nullable|in:Pendidikan Tinggi,Instansi Pemerintah,BUMN,Perusahaan Swasta',
+            'skala_instansi' => 'nullable|in:Wirausaha,Nasional,Multinasional',
         ]);
 
         $alumni = Alumni::findOrFail($nim);
 
-        // Cek apakah email_atasan sudah ada di tabel pengguna_lulusan
-        $penggunaLulusan = PenggunaLulusan::where('email_atasan', $request->email_atasan)->first();
-
-        if (!$penggunaLulusan) {
-            // Jika tidak ada, buat data pengguna_lulusan baru
-            $penggunaLulusan = PenggunaLulusan::create([
+        // Cek atau buat data pengguna_lulusan
+        $penggunaLulusan = PenggunaLulusan::updateOrCreate(
+            ['email_atasan' => $request->email_atasan], // Cari berdasarkan email_atasan
+            [
                 'nama_atasan' => $request->nama_atasan,
                 'jabatan_atasan' => $request->jabatan_atasan,
                 'email_atasan' => $request->email_atasan,
-                'nama_instansi' => $request->nama_instansi,
+            ]
+        );
+
+        // Cek atau buat data instansi
+        $instansi = Instansi::updateOrCreate(
+            ['nama_instansi' => $request->nama_instansi], // Cari berdasarkan nama_instansi
+            [
                 'jenis_instansi' => $request->jenis_instansi,
                 'skala_instansi' => $request->skala_instansi,
                 'lokasi_instansi' => $request->lokasi_instansi,
                 'no_hp_instansi' => $request->no_hp_instansi,
-            ]);
-        }
+            ]
+        );
 
         // Hitung masa tunggu (dalam bulan) berdasarkan tgl_lulus dan tanggal_kerja_pertama
         $masaTunggu = null;
@@ -137,6 +157,7 @@ class AlumniController extends Controller
             'kategori_profesi' => $request->kategori_profesi,
             'profesi' => $request->profesi,
             'id_pengguna_lulusan' => $penggunaLulusan->id_pengguna_lulusan,
+            'id_instansi' => $instansi->id_instansi,
         ]);
 
         return redirect()->route('alumni.index')->with('success', 'Data alumni berhasil diperbarui.');

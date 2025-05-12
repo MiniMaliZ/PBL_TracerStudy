@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AlumniController;
 
 use App\Http\Controllers\PertanyaanController;
+use App\Http\Controllers\TCFormController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,3 +51,17 @@ Route::post('/admin', [AdminController::class, 'store'])->name('admin.store');
 Route::get('/admin/{id}/edit', [AdminController::class, 'edit'])->name('admin.edit');
 Route::put('/admin/{id}', [AdminController::class, 'update'])->name('admin.update');
 Route::delete('/admin/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
+
+Route::prefix('tracerstudy')->group(function () {
+    //landing page
+    Route::get('/', [TCFormController::class, 'index']);
+    //opsi form
+    Route::get('/formopsi', [TCFormController::class, 'opsi'])->name("form.opsi");
+    // form alumni 
+    Route::get('/formopsi/formalumni', [TCFormController::class, 'kusionerA'])->name("form.alumni");
+    Route::get('/formulir', [TCFormController::class, 'nim'])->name('formulir.create'); // menampilkan nim importan 
+    Route::get('/get-alumni-data/{nim}', [TCFormController::class, 'getAlumniData']); // mengisi data otomatis 
+
+    //form penggunalulusan 
+    Route::get('/formopsi/formpenggunalulusan', [TCFormController::class, 'surveiPL'])->name("form.penggunalulusan");
+});

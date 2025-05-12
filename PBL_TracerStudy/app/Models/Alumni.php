@@ -23,11 +23,12 @@ class Alumni extends Model
         'tahun_masuk',
         'tgl_lulus',
         'tanggal_kerja_pertama',
-        'masa_tunggu',
         'tanggal_mulai_instansi',
+        'masa_tunggu',
         'kategori_profesi',
         'profesi',
         'id_pengguna_lulusan', // Foreign key ke tabel pengguna_lulusan
+        'id_instansi', // Foreign key ke tabel instansi
     ];
 
     /**
@@ -37,5 +38,10 @@ class Alumni extends Model
     public function penggunaLulusan()
     {
         return $this->belongsTo(PenggunaLulusan::class, 'id_pengguna_lulusan', 'id_pengguna_lulusan');
+    }
+
+    public function instansi()
+    {
+        return $this->belongsTo(Instansi::class, 'id_instansi', 'id_instansi');
     }
 }
