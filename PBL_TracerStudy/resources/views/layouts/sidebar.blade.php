@@ -26,6 +26,13 @@
                     <span class="nav-link-text ms-1">Pertanyaan</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('import*') ? 'active bg-gradient-dark text-white' : '' }}"
+                    href="{{ route('import.index') }}">
+                    <i class="material-symbols-rounded opacity-5">table_view</i>
+                    <span class="nav-link-text ms-1">Import</span>
+                </a>
+            </li>
         </ul>
     </div>
 </aside>
