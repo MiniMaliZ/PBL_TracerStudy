@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Tracer Study</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -47,10 +48,62 @@
             font-weight: bold;
             margin-bottom: 15px;
         }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button[type="submit"] {
+            background-color: #007649;
+            color: white;
+        }
+
+        button.kembali {
+            background-color: #ccc;
+            color: black;
+        }
     </style>
 </head>
 
 <body>
+    <script>
+        $(document).ready(function() {
+            $('#nim').on('change', function() {
+                var nim = $(this).val();
+
+                if (nim) {
+                    $.ajax({
+                        url: '{{ url('tracerstudy/get-alumni-data') }}/' + nim,
+                        method: 'GET',
+                        success: function(data) {
+                            if (data) {
+                                $('#nama_alumni').val(data.nama_alumni);
+                                $('#prodi').val(data.prodi);
+                                $('#tgl_lulus').val(data.tgl_lulus);
+                            } else {
+                                alert('Data alumni tidak ditemukan.');
+                            }
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data alumni.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 
     <header class="container d-flex align-items-center py-2 border-bottom">
         <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}">
@@ -62,6 +115,7 @@
 
     <main class="container my-5">
         <form action="" method="POST">
+            @csrf
             <h1 class="mb-4">Formulir</h1>
 
             <!-- Detail Pribadi -->
@@ -70,8 +124,13 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="nim" class="form-label">NIM</label>
-                        <input type="text" class="form-control" id="nim" name="nim" placeholder="NIM"
+                        <input list="daftar_nim" class="form-control" id="nim" name="nim" placeholder="NIM"
                             required>
+                        <datalist id="daftar_nim">
+                            @foreach ($nims as $nim)
+                                <option value="{{ $nim }}">
+                            @endforeach
+                        </datalist>
                     </div>
                     <div class="col-md-6">
                         <label for="nama_alumni" class="form-label">Nama</label>
@@ -159,6 +218,10 @@
                         <label for="profesi" class="form-label">Profesi</label>
                         <input type="text" class="form-control" id="profesi" name="profesi" required>
                     </div>
+                    <div class="col-md-6">
+                        <label for="notelpi" class="form-label">No telp Instansi</label>
+                        <input type="text" class="form-control" id="notelpi" name="notelpi" required>
+                    </div>
                 </div>
             </div>
 
@@ -178,16 +241,13 @@
                         <label for="email_atasan" class="form-label">Email Atasan</label>
                         <input type="text" class="form-control" id="email_atasan" name="email_atasan" required>
                     </div>
-                    <div class="col-md-6">
-                        <label for="notelpi" class="form-label">No telp Instansi</label>
-                        <input type="text" class="form-control" id="notelpi" name="notelpi" required>
-                    </div>
                 </div>
             </div>
 
-            <div class="text-end">
-                <button type="kembali" class="btn btn-secondary">Kembali</button>
-                <button type="submit" class="btn btn-success">Simpan</button>
+            <div class="button-group">
+                <button type="button" class="kembali"
+                    onclick="window.location.href='{{ route('form.opsi') }}'">Kembali</button>
+                <button type="submit">Simpan</button>
             </div>
         </form>
     </main>

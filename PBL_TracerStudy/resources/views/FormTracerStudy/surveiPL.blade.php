@@ -193,7 +193,7 @@
 
 <body>
     <header class="container d-flex align-items-center py-2 border-bottom">
-        <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}"> 
+        <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}">
         <div style="line-height: 1.2;">
             <h3 class="mb-0" style="font-size: 20px;">TRACER STUDY</h3>
             <p class="mb-0" style="font-size: 14px;">Politeknik Negeri Malang</p>
@@ -347,7 +347,8 @@
 
             <!-- Tombol -->
             <div class="button-group">
-                <button type="button" class="kembali">Kembali</button>
+                <button type="button" class="kembali"
+                    onclick="window.location.href='{{ route('form.opsi') }}'">Kembali</button>
                 <button type="submit">Simpan</button>
             </div>
         </form>

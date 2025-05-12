@@ -206,7 +206,7 @@
                     <!-- Kolom Tulisan -->
                     <div class="col-md-6 text-white">
                         <h1 class="welcome-text mt-4 mb-4">Selamat Datang di Sistem<br>Tracer Study</h1>
-                        <a href="/opsi" class="btn btn-fill-form mb-5">Isi Formulir</a>
+                        <a href="{{ route('form.opsi') }}" class="btn btn-fill-form mb-5">Isi Formulir</a>
                     </div>
                 </div>
             </div>
@@ -301,7 +301,7 @@
                     <h2 style="font-size: 2rem; font-weight: bold; margin: 0;">
                         Partisipasi anda penting untuk<br>kemajuan pendidikan tinggi
                     </h2>
-                    <a href="/opsi" class="btn"
+                    <a href="{{ route('form.opsi') }}" class="btn"
                         style="background-color: #F7DC6F; color: #000; font-weight: 600; padding: 10px 30px; border-radius: 5px; font-size: 16px;">
                         Isi Formulir
                     </a>
