@@ -11,6 +11,7 @@ class Instansi extends Model
 
     protected $table = 'instansi'; // Nama tabel
     protected $primaryKey = 'id_instansi'; // Primary key
+    public $timestamps = false; // Nonaktifkan timestamps
 
     protected $fillable = [
         'nama_instansi',

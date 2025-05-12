@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_instansi');
             $table->string('nama_instansi', 100)->nullable(); // Nama instansi
             $table->enum('jenis_instansi', ['Pendidikan Tinggi', 'Instansi Pemerintah', 'BUMN', 'Perusahaan Swasta'])->nullable(); // Jenis instansi
-            $table->enum('skala_instansi', ['Local', 'National', 'International'])->nullable(); // Skala instansi
+            $table->enum('skala_instansi', ['Wirausaha', 'Nasional', 'Multinasional'])->nullable(); // Skala instansi
             $table->string('lokasi_instansi', 100)->nullable(); // Lokasi instansi
             $table->string('no_hp_instansi', 20)->nullable(); // No HP instansi
         });
