@@ -6,7 +6,12 @@ use App\Models\Alumni;
 use App\Models\PenggunaLulusan;
 use App\Models\Instansi;
 use Illuminate\Http\Request;
-
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Barryvdh\DomPDF\Facade\Pdf;
 class AlumniController extends Controller
 {
     // Menampilkan data dalam tabel
@@ -170,5 +175,111 @@ class AlumniController extends Controller
         $alumni->delete();
 
         return redirect()->route('alumni.index')->with('success', 'Data alumni berhasil dihapus.');
+    }
+    public function import()
+    {
+        return view('admin.Alumni.indexAlumni');
+    }
+
+public function import_ajax(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'file_alumni' => ['required', 'file', 'mimes:xlsx', 'max:1024']
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    $file = $request->file('file_alumni');
+    $reader = IOFactory::createReader('Xlsx');
+    $spreadsheet = $reader->load($file->getRealPath());
+    $sheet = $spreadsheet->getActiveSheet();
+    $data = $sheet->toArray(null, true, true, true);
+
+    $insert = [];
+    foreach ($data as $i => $row) {
+        if ($i == 1) continue; // skip header
+
+        $tgl_lulus = $this->convertExcelDate($row['D'] ?? null);
+
+        $insert[] = [
+            'nim' => $row['A'],
+            'nama_alumni' => $row['B'],
+            'prodi' => $row['C'],
+            'tgl_lulus' => $tgl_lulus,
+        ];
+    }
+
+    if (!empty($insert)) {
+        Alumni::insertOrIgnore($insert);
+        return redirect()->back()->with('success', 'Data berhasil diimpor.');
+    }
+
+    return redirect()->back()->with('error', 'Tidak ada data yang diimpor.');
+}
+
+
+// Tambahkan fungsi bantu ini dalam controller
+private function convertExcelDate($value)
+{
+    if (!$value) return null;
+
+    try {
+        if (is_numeric($value)) {
+            return Date::excelToDateTimeObject($value)->format('Y-m-d');
+        } else {
+            return \Carbon\Carbon::parse($value)->format('Y-m-d');
+        }
+    } catch (\Exception $e) {
+        return null;
+    }
+}
+
+    public function export_excel()
+    {
+        $alumni = Alumni::orderBy('prodi')->get();
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header
+        $sheet->fromArray([
+            ['No', 'NIM', 'Nama Alumni', 'Prodi', 'No HP', 'Email','tahun_masuk','tgl_lulus','tanggal_kerja_pertama','tanggal_mulai_instansi',]
+        ], null, 'A1');
+
+        $row = 2;
+        $no = 1;
+        foreach ($alumni as $item) {
+            $sheet->fromArray([
+                $no++,
+                $item->nim,
+                $item->nama_alumni,
+                $item->prodi,
+                $item->no_hp,
+                $item->email,
+                $item->tahun_masuk,
+                $item->tgl_lulus,
+                $item->tanggal_kerja_pertama,
+                $item->tanggal_mulai_instansi,
+            ], null, 'A' . $row++);
+            
+        }
+
+        foreach (range('A', 'J') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        
+
+        $filename = 'Data Alumni ' . now()->format('Y-m-d H-i-s') . '.xlsx';
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
 }

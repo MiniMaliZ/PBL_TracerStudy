@@ -53,6 +53,9 @@ Route::post('/alumni', [AlumniController::class, 'store'])->name('alumni.store')
 Route::get('/alumni/{nim}/edit', [AlumniController::class, 'edit'])->name('alumni.edit');
 Route::put('/alumni/{nim}', [AlumniController::class, 'update'])->name('alumni.update');
 Route::delete('/alumni/{nim}', [AlumniController::class, 'destroy'])->name('alumni.destroy');
+Route::get('/alumni/export', [AlumniController::class, 'export_excel'])->name('alumni.export');
+Route::post('/alumni/import', [AlumniController::class, 'import_ajax'])->name('alumni.import_ajax');
+
 
 // Routes untuk tabel Admin
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
