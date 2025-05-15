@@ -48,11 +48,14 @@ Route::prefix('tracerstudy')->group(function () {
     Route::get('/', [TCFormController::class, 'index']);
     //opsi form
     Route::get('/formopsi', [TCFormController::class, 'opsi'])->name("form.opsi");
+
     // form alumni 
     Route::get('/formopsi/formalumni', [TCFormController::class, 'kusionerA'])->name("form.alumni");
     Route::get('/formulir', [TCFormController::class, 'nim'])->name('formulir.create'); // menampilkan nim importan 
-    Route::get('/get-alumni-data/{nim}', [TCFormController::class, 'getAlumniData']); // mengisi data otomatis 
+    Route::get('/get-alumni-data/{keyword}', [TCFormController::class, 'getAlumniData']); // mengisi data otomatis 
+    Route::post('/formulir/{nim}', [TCFormController::class, 'create_form'])->name('formulir.store'); // menyimpan data form tracer study 
 
     //form penggunalulusan 
     Route::get('/formopsi/formpenggunalulusan', [TCFormController::class, 'surveiPL'])->name("form.penggunalulusan");
+    Route::get('/get-pl-data/{nama}', [TCFormController::class, 'getPL']);// mengisi data otomatis 
 });

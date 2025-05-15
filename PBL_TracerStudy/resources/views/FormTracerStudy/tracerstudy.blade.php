@@ -80,12 +80,13 @@
 <body>
     <script>
         $(document).ready(function() {
+            // Event untuk isi data alumni berdasarkan NIM
             $('#nim').on('change', function() {
                 var nim = $(this).val();
-
                 if (nim) {
+                    $('#form-tracer').attr('action', '/tracerstudy/formulir/' + nim);
                     $.ajax({
-                        url: '{{ url('tracerstudy/get-alumni-data') }}/' + nim,
+                        url: '/tracerstudy/get-alumni-data/' + nim,
                         method: 'GET',
                         success: function(data) {
                             if (data) {
@@ -102,6 +103,51 @@
                     });
                 }
             });
+
+            $('#nama_alumni').on('input', function() {
+                var nama = $(this).val();
+                if (nama.length >= 3) {
+                    $.ajax({
+                        url: '/tracerstudy/get-alumni-data/' + encodeURIComponent(nama),
+                        method: 'GET',
+                        success: function(data) {
+                            if (data) {
+                                $('#nim').val(data.nim);
+                                $('#prodi').val(data.prodi);
+                                $('#tgl_lulus').val(data.tgl_lulus);
+                            } else {
+                                $('#prodi').val('');
+                                $('#tgl_lulus').val('');
+                            }
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data berdasarkan nama alumni.');
+                        }
+                    });
+                }
+            });
+
+            // Event untuk isi data pengguna lulusan berdasarkan nama atasan
+            $('#nama_atasan').on('change', function() {
+                var nama = $(this).val();
+                if (nama) {
+                    $.ajax({
+                        url: '/tracerstudy/get-pl-data/' + encodeURIComponent(nama),
+                        method: 'GET',
+                        success: function(data) {
+                            if (data) {
+                                $('#jabatan').val(data.jabatan_atasan);
+                                $('#email_pl').val(data.email_atasan);
+                            } else {
+                                alert('Data pengguna lulusan tidak ditemukan.');
+                            }
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data pengguna lulusan.');
+                        }
+                    });
+                }
+            });
         });
     </script>
 
@@ -114,7 +160,7 @@
     </header>
 
     <main class="container my-5">
-        <form action="" method="POST">
+        <form id="form-tracer" method="POST">
             @csrf
             <h1 class="mb-4">Formulir</h1>
 
@@ -181,18 +227,18 @@
                         <label for="jenis_instansi" class="form-label">Jenis Instansi</label>
                         <select class="form-select" id="jenis_instansi" name="jenis_instansi" required>
                             <option value="" disabled selected>Pilih...</option>
-                            <option value="pendidikan_tinggi">Pendidikan tinggi</option>
-                            <option value="instansi_pemerintah">Instansi Pemerintah</option>
-                            <option value="bumn">BUMN</option>
-                            <option value="perusahaan_swasta">Perusahaan swasta</option>
+                            <option value="Pendidikan Tinggi">Pendidikan Tinggi</option>
+                            <option value="Instansi Pemerintah">Instansi Pemerintah</option>
+                            <option value="BUMN">BUMN</option>
+                            <option value="Perusahaan Swasta">Perusahaan Swasta</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label for="skala_instansi" class="form-label">Skala Instansi</label>
                         <select class="form-select" id="skala_instansi" name="skala_instansi" required>
                             <option value="" disabled selected>Pilih...</option>
-                            <option value="Nasional">Nasional</option>
                             <option value="Wirausaha">Wirausaha</option>
+                            <option value="Nasional">Nasional</option>
                             <option value="Multinasional">Multinasional</option>
                         </select>
                     </div>
@@ -214,13 +260,14 @@
                             <option value="non infokom">Non Infokom</option>
                         </select>
                     </div>
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <label for="profesi" class="form-label">Profesi</label>
                         <input type="text" class="form-control" id="profesi" name="profesi" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="notelpi" class="form-label">No telp Instansi</label>
-                        <input type="text" class="form-control" id="notelpi" name="notelpi" required>
+                        <label for="no_hp_instansi" class="form-label">No telp Instansi</label>
+                        <input type="text" class="form-control" id="no_hp_instansi" name="no_hp_instansi"
+                            required>
                     </div>
                 </div>
             </div>
@@ -230,12 +277,13 @@
                 <h2>Detail Pengguna Lulusan (Supervisor)</h2>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="nama_pl" class="form-label">Nama Atasan</label>
-                        <input type="text" class="form-control" id="nama_pl" name="nama_pl" required>
+                        <label for="nama_atasan" class="form-label">Nama Atasan</label>
+                        <input type="text" class="form-control" id="nama_atasan" name="nama_atasan" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="jabatan" class="form-label">Jabatan Atasan</label>
-                        <input type="text" class="form-control" id="jabatan" name="jabatan" required>
+                        <label for="jabatan_atasan" class="form-label">Jabatan Atasan</label>
+                        <input type="text" class="form-control" id="jabatan_atasan" name="jabatan_atasan"
+                            required>
                     </div>
                     <div class="col-md-6">
                         <label for="email_atasan" class="form-label">Email Atasan</label>

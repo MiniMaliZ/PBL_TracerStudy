@@ -93,6 +93,16 @@
             margin-top: 3rem;
         }
 
+        footer {
+            text-align: center;
+            background-color: #166a3b;
+            padding: 10px 0;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            margin-top: 50px;
+        }
+
         @keyframes fadeUp {
             from {
                 opacity: 0;
@@ -146,7 +156,8 @@
         <div class="info-card">
             <img src="{{ asset('landingpageimg/happy students.png') }}" alt="Alumni Image" />
             <h5>Alumni</h5>
-            <p style="margin-bottom: 35px; ">Pengguna yang telah lulus dari institusi dan mengisi form untuk memberikan informasi terkait pekerjaan,
+            <p style="margin-bottom: 35px; ">Pengguna yang telah lulus dari institusi dan mengisi form untuk memberikan
+                informasi terkait pekerjaan,
                 studi lanjutan, dan pengalaman pasca-kelulusan.</p>
             <a class="btn-formulir btn btn-fill-form mb-5" href="{{ route('form.alumni') }}">Isi Formulir</a>
         </div>
@@ -162,9 +173,9 @@
     </div>
 
     <!-- Footer -->
-    <div class="copyright">
+    <footer>
         &copy; 2025 Politeknik Negeri Malang. All Rights Reserved.
-    </div>
+    </footer>
 
 </body>
 
