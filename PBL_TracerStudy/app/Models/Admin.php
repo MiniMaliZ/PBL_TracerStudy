@@ -20,6 +20,11 @@ class Admin extends Authenticatable
         'nama',
     ];
 
+    public function getAuthIdentifierName()
+    {
+        return 'username';
+    }
+
     // Relasi ke tabel pertanyaan
     public function pertanyaan()
     {
