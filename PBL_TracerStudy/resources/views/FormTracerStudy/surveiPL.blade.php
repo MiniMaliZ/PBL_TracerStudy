@@ -7,6 +7,7 @@
     <title>Survey Pengguna Lulusan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         html,
         body {
@@ -172,6 +173,7 @@
 
     <script>
         $(document).ready(function() {
+            // Auto isi data alumni
             $('#nama_alumni').on('input', function() {
                 var nama = $(this).val();
                 if (nama.length >= 3) {
@@ -194,6 +196,7 @@
                 }
             });
 
+            // Auto isi data pengguna lulusan (atasan)
             $('#nama_atasan').on('input', function() {
                 var nama = $(this).val();
                 if (nama.length >= 3) {
@@ -210,10 +213,49 @@
                             }
                         },
                         error: function() {
-                            alert('Gagal mengambil data berdasarkan nama alumni.');
+                            alert('Gagal mengambil data berdasarkan nama atasan.');
                         }
                     });
                 }
+            });
+
+            // Submit form dengan AJAX
+            $('form').on('submit', function(e) {
+                e.preventDefault(); // Mencegah reload
+
+                let form = $(this);
+                let formData = form.serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: form.attr('action'),
+                    data: formData,
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: response.message,
+                            confirmButtonColor: '#007649',
+                        }).then(() => {
+                            window.location.href = response.redirect;
+                        });
+                    },
+                    error: function(xhr) {
+                        let msg = 'Terjadi kesalahan.';
+                        if (xhr.status === 409 && xhr.responseJSON?.error) {
+                            msg = xhr.responseJSON.error;
+                        } else if (xhr.responseJSON?.error) {
+                            msg = xhr.responseJSON.error;
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: msg,
+                            confirmButtonColor: '#d33',
+                        });
+                    }
+                });
             });
         });
     </script>
@@ -227,7 +269,8 @@
     </header>
 
     <main>
-        <form class="form-container" action="" method="POST">
+        <form class="form-container" action="{{ route('survey.store') }}" method="POST">
+            @csrf
             <h1>Survey</h1>
 
             <!-- Pengguna Lulusan -->

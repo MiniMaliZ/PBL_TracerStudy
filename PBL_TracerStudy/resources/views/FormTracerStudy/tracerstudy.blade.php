@@ -7,6 +7,7 @@
     <title>Form Tracer Study</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -78,9 +79,10 @@
 </head>
 
 <body>
+    
     <script>
         $(document).ready(function() {
-            // Event untuk isi data alumni berdasarkan NIM
+            // Update form action saat NIM berubah
             $('#nim').on('change', function() {
                 var nim = $(this).val();
                 if (nim) {
@@ -104,6 +106,7 @@
                 }
             });
 
+            // Input nama_alumni untuk autocomplete (optional)
             $('#nama_alumni').on('input', function() {
                 var nama = $(this).val();
                 if (nama.length >= 3) {
@@ -127,7 +130,7 @@
                 }
             });
 
-            // Event untuk isi data pengguna lulusan berdasarkan nama atasan
+            // Isi data pengguna lulusan berdasarkan nama atasan
             $('#nama_atasan').on('change', function() {
                 var nama = $(this).val();
                 if (nama) {
@@ -136,8 +139,8 @@
                         method: 'GET',
                         success: function(data) {
                             if (data) {
-                                $('#jabatan').val(data.jabatan_atasan);
-                                $('#email_pl').val(data.email_atasan);
+                                $('#jabatan_atasan').val(data.jabatan_atasan);
+                                $('#email_atasan').val(data.email_atasan);
                             } else {
                                 alert('Data pengguna lulusan tidak ditemukan.');
                             }
@@ -148,8 +151,55 @@
                     });
                 }
             });
+
+            // AJAX submit form dengan SweetAlert
+            $('#form-tracer').submit(function(e) {
+                e.preventDefault();
+
+                let form = $(this);
+                let url = form.attr('action');
+
+                if (!url) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Silakan pilih NIM terlebih dahulu agar form dapat disubmit.',
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: form.serialize(),
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            if (response.redirect) {
+                                window.location.href = response.redirect;
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        let errMsg = 'Terjadi kesalahan saat menyimpan data.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errMsg = xhr.responseJSON.message;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errMsg,
+                        });
+                    }
+                });
+            });
         });
     </script>
+
 
     <header class="container d-flex align-items-center py-2 border-bottom">
         <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}">

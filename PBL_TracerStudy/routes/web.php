@@ -58,4 +58,6 @@ Route::prefix('tracerstudy')->group(function () {
     //form penggunalulusan 
     Route::get('/formopsi/formpenggunalulusan', [TCFormController::class, 'surveiPL'])->name("form.penggunalulusan");
     Route::get('/get-pl-data/{nama}', [TCFormController::class, 'getPL']);// mengisi data otomatis 
+    Route::post('/tracerstudy/store', [TCFormController::class, 'create_PL'])->name('survey.store');
+
 });

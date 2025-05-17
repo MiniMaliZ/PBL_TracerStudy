@@ -198,7 +198,7 @@
                 <div class="row align-items-center" style="min-height: 500px;">
                     <!-- Kolom Gambar -->
                     <div class="col-md-6 position-relative">
-                        <img src="{{ asset('landingpageimg/IMG_6875.png') }}"
+                        <img src="{{ asset('landingpageimg/Tracer-Logo.png') }}"
                             alt="Tracer Study Illustration"
                             style="height: 500px; width: 100%; object-fit: contain; margin-bottom: 50px;">
                     </div>

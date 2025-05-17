@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Alumni;
 use App\Models\Instansi;
+use App\Models\Jawaban;
 use App\Models\PenggunaLulusan;
 use App\Models\Pertanyaan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TCFormController extends Controller
 {
@@ -97,7 +99,7 @@ class TCFormController extends Controller
         }
 
         return response()->json([
-            'message' => 'Data berhasil disimpan.',
+            'message' => 'Terimakasih, data berhasil disimpan',
             'redirect' => url('/tracerstudy/formopsi'),
         ]);
     }
@@ -131,5 +133,49 @@ class TCFormController extends Controller
         return response()->json(null);
     }
 
-    public function create_PL(Request $request) {}
+    public function create_PL(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $pengguna = PenggunaLulusan::where('nama_atasan', $request->nama_atasan)->first();
+            if (!$pengguna) {
+                return response()->json(['error' => 'Data pengguna lulusan tidak ditemukan.'], 404);
+            }
+
+            $alumni = Alumni::where('nama_alumni', $request->nama_alumni)->first();
+            if (!$alumni) {
+                return response()->json(['error' => 'Data alumni tidak ditemukan.'], 404);
+            }
+
+            //Cek apakah alumni sudah pernah dinilai sebelumnya
+            $existingAnswers = Jawaban::where('nim_alumni', $alumni->nim)->exists();
+            if ($existingAnswers) {
+                return response()->json([
+                    'error' => 'Alumni ini sudah pernah dinilai sebelumnya.'
+                ], 409); // 409 = Conflict
+            }
+
+            // Simpan jawaban
+            foreach ($request->jawaban as $id_pertanyaan => $isi_jawaban) {
+                Jawaban::create([
+                    'id_pertanyaan'       => $id_pertanyaan,
+                    'jawaban'             => $isi_jawaban,
+                    'nim_alumni'          => $alumni->nim,
+                    'id_pengguna_lulusan' => $pengguna->id_pengguna_lulusan,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Terimakasih, data berhasil disimpan',
+                'redirect' => route('form.opsi')
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
