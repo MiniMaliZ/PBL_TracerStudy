@@ -7,7 +7,10 @@ use App\Http\Controllers\PertanyaanController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AlumniController;
+use App\Http\Controllers\PertanyaanController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TCFormController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +27,25 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Tambahkan route untuk dashboard
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'postlogin'])->name('login.process');
+
+// Logout
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Redirect root to login
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
+// Route::get('register', [AuthController::class, 'register'])->name('register');
+// Route::post('register', [AuthController::class, 'postRegister']);
+
+// Route::get('forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
+// Route::post('forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+// Route::get('reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+// Route::post('reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
+
 Route::get('/dashboard', function () {
     return view('admin.dashboard'); // Pastikan file ini ada
 })->name('dashboard');
@@ -70,11 +91,16 @@ Route::prefix('tracerstudy')->group(function () {
     Route::get('/', [TCFormController::class, 'index']);
     //opsi form
     Route::get('/formopsi', [TCFormController::class, 'opsi'])->name("form.opsi");
+
     // form alumni 
     Route::get('/formopsi/formalumni', [TCFormController::class, 'kusionerA'])->name("form.alumni");
     Route::get('/formulir', [TCFormController::class, 'nim'])->name('formulir.create'); // menampilkan nim importan 
-    Route::get('/get-alumni-data/{nim}', [TCFormController::class, 'getAlumniData']); // mengisi data otomatis 
+    Route::get('/get-alumni-data/{keyword}', [TCFormController::class, 'getAlumniData']); // mengisi data otomatis 
+    Route::post('/formulir/{nim}', [TCFormController::class, 'create_form'])->name('formulir.store'); // menyimpan data form tracer study 
 
     //form penggunalulusan 
     Route::get('/formopsi/formpenggunalulusan', [TCFormController::class, 'surveiPL'])->name("form.penggunalulusan");
+    Route::get('/get-pl-data/{nama}', [TCFormController::class, 'getPL']);// mengisi data otomatis 
+    Route::post('/tracerstudy/store', [TCFormController::class, 'create_PL'])->name('survey.store');
+
 });

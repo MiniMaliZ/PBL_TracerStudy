@@ -7,6 +7,7 @@
     <title>Form Tracer Study</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -78,14 +79,16 @@
 </head>
 
 <body>
+    
     <script>
         $(document).ready(function() {
+            // Update form action saat NIM berubah
             $('#nim').on('change', function() {
                 var nim = $(this).val();
-
                 if (nim) {
+                    $('#form-tracer').attr('action', '/tracerstudy/formulir/' + nim);
                     $.ajax({
-                        url: '{{ url('tracerstudy/get-alumni-data') }}/' + nim,
+                        url: '/tracerstudy/get-alumni-data/' + nim,
                         method: 'GET',
                         success: function(data) {
                             if (data) {
@@ -102,8 +105,101 @@
                     });
                 }
             });
+
+            // Input nama_alumni untuk autocomplete (optional)
+            $('#nama_alumni').on('input', function() {
+                var nama = $(this).val();
+                if (nama.length >= 3) {
+                    $.ajax({
+                        url: '/tracerstudy/get-alumni-data/' + encodeURIComponent(nama),
+                        method: 'GET',
+                        success: function(data) {
+                            if (data) {
+                                $('#nim').val(data.nim);
+                                $('#prodi').val(data.prodi);
+                                $('#tgl_lulus').val(data.tgl_lulus);
+                            } else {
+                                $('#prodi').val('');
+                                $('#tgl_lulus').val('');
+                            }
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data berdasarkan nama alumni.');
+                        }
+                    });
+                }
+            });
+
+            // Isi data pengguna lulusan berdasarkan nama atasan
+            $('#nama_atasan').on('change', function() {
+                var nama = $(this).val();
+                if (nama) {
+                    $.ajax({
+                        url: '/tracerstudy/get-pl-data/' + encodeURIComponent(nama),
+                        method: 'GET',
+                        success: function(data) {
+                            if (data) {
+                                $('#jabatan_atasan').val(data.jabatan_atasan);
+                                $('#email_atasan').val(data.email_atasan);
+                            } else {
+                                alert('Data pengguna lulusan tidak ditemukan.');
+                            }
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data pengguna lulusan.');
+                        }
+                    });
+                }
+            });
+
+            // AJAX submit form dengan SweetAlert
+            $('#form-tracer').submit(function(e) {
+                e.preventDefault();
+
+                let form = $(this);
+                let url = form.attr('action');
+
+                if (!url) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Silakan pilih NIM terlebih dahulu agar form dapat disubmit.',
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: form.serialize(),
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            if (response.redirect) {
+                                window.location.href = response.redirect;
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        let errMsg = 'Terjadi kesalahan saat menyimpan data.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errMsg = xhr.responseJSON.message;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errMsg,
+                        });
+                    }
+                });
+            });
         });
     </script>
+
 
     <header class="container d-flex align-items-center py-2 border-bottom">
         <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}">
@@ -114,7 +210,7 @@
     </header>
 
     <main class="container my-5">
-        <form action="" method="POST">
+        <form id="form-tracer" method="POST">
             @csrf
             <h1 class="mb-4">Formulir</h1>
 
@@ -181,18 +277,18 @@
                         <label for="jenis_instansi" class="form-label">Jenis Instansi</label>
                         <select class="form-select" id="jenis_instansi" name="jenis_instansi" required>
                             <option value="" disabled selected>Pilih...</option>
-                            <option value="pendidikan_tinggi">Pendidikan tinggi</option>
-                            <option value="instansi_pemerintah">Instansi Pemerintah</option>
-                            <option value="bumn">BUMN</option>
-                            <option value="perusahaan_swasta">Perusahaan swasta</option>
+                            <option value="Pendidikan Tinggi">Pendidikan Tinggi</option>
+                            <option value="Instansi Pemerintah">Instansi Pemerintah</option>
+                            <option value="BUMN">BUMN</option>
+                            <option value="Perusahaan Swasta">Perusahaan Swasta</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label for="skala_instansi" class="form-label">Skala Instansi</label>
                         <select class="form-select" id="skala_instansi" name="skala_instansi" required>
                             <option value="" disabled selected>Pilih...</option>
-                            <option value="Nasional">Nasional</option>
                             <option value="Wirausaha">Wirausaha</option>
+                            <option value="Nasional">Nasional</option>
                             <option value="Multinasional">Multinasional</option>
                         </select>
                     </div>
@@ -214,13 +310,14 @@
                             <option value="non infokom">Non Infokom</option>
                         </select>
                     </div>
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <label for="profesi" class="form-label">Profesi</label>
                         <input type="text" class="form-control" id="profesi" name="profesi" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="notelpi" class="form-label">No telp Instansi</label>
-                        <input type="text" class="form-control" id="notelpi" name="notelpi" required>
+                        <label for="no_hp_instansi" class="form-label">No telp Instansi</label>
+                        <input type="text" class="form-control" id="no_hp_instansi" name="no_hp_instansi"
+                            required>
                     </div>
                 </div>
             </div>
@@ -230,12 +327,13 @@
                 <h2>Detail Pengguna Lulusan (Supervisor)</h2>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="nama_pl" class="form-label">Nama Atasan</label>
-                        <input type="text" class="form-control" id="nama_pl" name="nama_pl" required>
+                        <label for="nama_atasan" class="form-label">Nama Atasan</label>
+                        <input type="text" class="form-control" id="nama_atasan" name="nama_atasan" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="jabatan" class="form-label">Jabatan Atasan</label>
-                        <input type="text" class="form-control" id="jabatan" name="jabatan" required>
+                        <label for="jabatan_atasan" class="form-label">Jabatan Atasan</label>
+                        <input type="text" class="form-control" id="jabatan_atasan" name="jabatan_atasan"
+                            required>
                     </div>
                     <div class="col-md-6">
                         <label for="email_atasan" class="form-label">Email Atasan</label>
