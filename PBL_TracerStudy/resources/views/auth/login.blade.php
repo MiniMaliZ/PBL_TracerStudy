@@ -4,294 +4,255 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracer Study - Login</title>
+    <meta name="description" content="Login to Tracer Study system">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            700: '#13754C',
+                            800: '#084D30',
+                        },
+                        cyan: {
+                            400: '#22d3ee',
+                        },
+                        blue: {
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Background Animation */
+        @keyframes slowZoom {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
-        
-        body {
-            background: linear-gradient(to bottom, #0d6e4e 50%, #f5f5f5 50%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 0 5rem; /* Padding kiri-kanan */
-            margin-top: 2rem;
-            padding-bottom: 2rem;
-            overflow: hidden;
-        }
-        
-        .left-panel {
-            background-color: #0d6e4e;
-            color: white;
-            width: 100%;
-            height: 45%;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .logo {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            margin-left: -50px;  /* Geser logo ke kiri */
 
+        .animated-bg {
+            animation: slowZoom 20s infinite ease-in-out;
         }
-        
-        .left-panel h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            margin-top: -40px;
-        }
-        
-        .left-panel p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            max-width: 80%;
-            margin-top: -10px;
-        }
-        
-        .illustration {
-            position: relative;
-            width: 100%;
-            height: 50%;
-            margin-top: 2rem;
-        }
-        
-        .illustration img {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-        }
-        
-        .right-panel {
-            width: 40%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-        }
-        
-        .login-container {
-    background-color: white;
-    border-radius: 10px;
-    margin: 0 auto;  /* Tetap terpusat horizontal */
-    padding: 4rem;   /* Padding besar untuk membuat container lebih lebar */
-    width: 90%;      /* Lebar relatif untuk responsif */
-    max-width: 600px; /* Lebar maksimum yang lebih besar */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    box-sizing: border-box;
-}
 
-@media (max-width: 768px) {
-    .login-container {
-        padding: 2rem;  /* Padding lebih kecil untuk mobile */
-        width: 85%;     /* Lebar lebih besar di mobile */
-        margin: 2rem auto; /* Tetap terpusat */
-    }
-}
+        /* Optional: Gentle floating effect for the content */
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
 
-        
-        .welcome-text {
-            margin-bottom: 1.5rem;
-        }
-        
-        .welcome-text h2 {
-            font-size: 1.2rem;
-            color: #0d6e4e;
-            font-weight: 500;
-        }
-        
-        .welcome-text h1 {
-            font-size: 2rem;
-            color: #333;
-            margin-top: 0.5rem;
-        }
-        
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .input-group label {
-            display: block;
-            color: #333;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #0d6e4e;
-        }
-        
-        .login-btn {
-            background-color: #0d6e4e;
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            width: 100%;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .login-btn:hover {
-            background-color: #085d41;
-        }
-        
-        .signup-link {
-            text-align: right;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .signup-link a {
-            color: #0d6e4e;
-            text-decoration: none;
-        }
-        
-        .signup-link a:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-                overflow-y: auto;
-            }
-            
-            .left-panel {
-                width: 100%;
-                height: 30vh;
-                margin-top: -20px;
-                padding: 2.5rem;
-            }
-            
-            .left-panel p {
-                max-width: 100%;
-                font-size: 2rem;
-            }
-            
-            .illustration {
-                display: none;
-            }
-            
-            .right-panel {
-                width: 100%;
-                height: 70vh;
-            }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
         }
     </style>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <body>
-    <div class="left-panel">
-        <div class="logo">
-            <img src="logo-tracer.png" alt="Logo Tracer Study" width="250">
+    <div class="min-h-screen flex items-center justify-center bg-emerald-800 relative overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img
+                src="{{ asset('images/campus-background.jpg') }}"
+                alt="Campus Background"
+                class="object-cover w-full h-full opacity-25 animated-bg"
+            >
         </div>
-        <h1>Login to<br>Sistem Tracer Study</h1>
-        <p>Tracer Study adalah survei yang dilakukan oleh institusi pendidikan kepada alumni untuk melacak jejak karier dan penilaian terhadap pendidikan yang telah diterima.</p>
-        <div class="illustration">
-            <img src="/api/placeholder/400/320" alt="Tracer Study Illustration">
+
+        <div class="container mx-auto px-5 z-10">
+            <div class="flex flex-col md:flex-row items-center md-max justify-center md:justify-between max-w-10xl mx-auto">
+                <div class="text-center text-white w-full md:w-1/2 max-w-xl mx-auto pr-0 md:pr-12">
+                    <div class="flex justify-center mb-4">
+                        <div class="logo float-animation">
+                        <div class="logo">
+                            <img src="{{ asset('logo-tracer.png') }}" alt="Logo Tracer Study" width="180" height="180">
+                        </div>
+                        </div>
+                    </div>
+                    <h1 class="text-4xl font-bold mt-1">Login to</h1>
+                    <h2 class="text-4xl font-bold mb-6">Sistem Tracer Study</h2>
+
+                    <h3 class="text-2xl font-semibold mb-4">Welcome back, Admin!</h3>
+                    <p class="text-lg md:text-xl mx-auto px-4">
+                        Tracer Study adalah survei yang dilakukan oleh institusi pendidikan kepada alumni untuk melacak jejak karier dan penilaian terhadap pendidikan yang telah diterima.
+                    </p>
+                </div>
+
+                <div class="bg-white/95 rounded-lg p-10 w-full max-w-xl h-auto min-h-[480px] flex flex-col shadow-xl mt-10 md:mt-12 md:ml-24">
+                    <div class="mb-8">
+                        <p class="text-xl text-emerald-800 font-medium">
+                            Welcome to <span class="text-xl text-emerald-700 font-semibold">Tracer Study</span>
+                        </p>
+                        <h2 class="text-3xl font-bold text-gray-900">Login</h2>
+                        <div id="login-error" class="text-red-600 mt-2 text-sm hidden"></div>
+                    </div>
+
+                    <form id="login-form" method="POST" action="{{ route('login') }}" class="space-y-8 flex-grow flex flex-col">
+                        @csrf
+
+                        <div class="space-y-2">
+                            <label for="username" class="block text-base font-medium text-gray-700">
+                                Enter your username
+                            </label>
+                            <input
+                                id="username"
+                                name="username"
+                                type="text"
+                                placeholder="Username"
+                                class="w-full px-4 py-4 border border-gray-300 rounded-md shadow-sm text-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                                required
+                                autofocus
+                            >
+                            @error('username')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="password" class="block text-base font-medium text-gray-700">
+                                Enter your Password
+                            </label>
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                placeholder="Password"
+                                class="w-full px-4 py-4 border border-gray-300 rounded-md shadow-sm text-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                                required
+                            >
+                            @error('password')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="flex items-center">
+                            <input
+                                id="remember_me"
+                                name="remember"
+                                type="checkbox"
+                                class="h-5 w-5 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                            >
+                            <label for="remember_me" class="ml-2 block text-base text-gray-700">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <div class="mt-auto">
+                            <button
+                                type="submit"
+                                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                            >
+                                Login
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <div class="right-panel">
-        <div class="login-container">
-            <div class="welcome-text">
-                <h2>Welcome to Tracer Study</h2>
-                <h1>Login</h1>
-            </div>
-            
-            <form id="loginForm" method="POST" action="{{ route('login.process') }}">
-                @csrf
-                <div class="input-group">
-                    <label for="username">Enter your username</label>
-                    <input type="text" id="username" name="username" placeholder="Username">
-                    <small id="error-username" class="error-text text-danger"></small>
-                </div>
-                
-                <div class="input-group">
-                    <label for="password">Enter your Password</label>
-                    <input type="password" id="password" name="password" placeholder="Password">
-                    <small id="error-password" class="error-text text-danger"></small>
-                </div>
-                
-                <button type="submit" class="login-btn">Login</button>
-            </form>
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         
-            <!-- jQuery dan SweetAlert2 -->
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        
-            <script>
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        $(document).ready(function() {
+            $("#login-form").validate({
+                rules: {
+                    username: {
+                        required: true,
+                        minlength: 4,
+                        maxlength: 20
+                    },
+                    password: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 20
                     }
-                });
-        
-                $(document).ready(function () {
-                    $('#loginForm').on('submit', function (e) {
-                        e.preventDefault();
-        
-                        const form = this;
-                        const formData = $(form).serialize();
-        
-                        // Clear previous errors
-                        $('.error-text').text('');
-        
-                        $.ajax({
-                            url: $(form).attr('action'),
-                            method: $(form).attr('method'),
-                            data: formData,
-                            success: function (response) {
-                                if (response.status) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Login Berhasil',
-                                        text: response.message
-                                    }).then(() => {
-                                        window.location.href = response.redirect;
-                                    });
-                                } else {
-                                    $.each(response.msgField, function (prefix, val) {
-                                        $('#error-' + prefix).text(val[0]);
-                                    });
-        
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Login Gagal',
-                                        text: response.message
-                                    });
-                                }
-                            },
-                            error: function (xhr) {
+                },
+                submitHandler: function(form) {
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Logging in...',
+                        text: 'Please wait',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    $.ajax({
+                        url: form.action,
+                        type: form.method,
+                        data: $(form).serialize(),
+                        success: function(response) {
+                            if (response.status) {
+                                // Success popup
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Login Berhasil!',
+                                    text: response.message,
+                                    confirmButtonColor: '#13754C',
+                                    timer: 2000,
+                                    timerProgressBar: true
+                                }).then(() => {
+                                    window.location = response.redirect;
+                                });
+                            } else {
+                                // Error popup
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Terjadi Kesalahan',
-                                    text: xhr.status === 419 ? 'Session expired (CSRF token tidak valid)' : 'Login gagal, cek kembali data Anda.'
+                                    title: 'Login Gagal!',
+                                    text: response.message,
+                                    confirmButtonColor: '#13754C'
                                 });
                             }
-                        });
+                        },
+                        error: function(xhr) {
+                            // Server error popup
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Login Gagal!',
+                                text: 'Terjadi kesalahan saat menghubungi server.',
+                                confirmButtonColor: '#13754C'
+                            });
+                        }
                     });
-                });
-            </script>
+                    return false;
+                },
+                errorElement: 'span',
+                errorPlacement: function(error, element) {
+                    error.addClass('text-red-500 text-sm');
+                    error.insertAfter(element);
+                },
+                highlight: function(element) {
+                    $(element).addClass('border-red-500');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('border-red-500');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

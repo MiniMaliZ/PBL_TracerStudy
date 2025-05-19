@@ -35,10 +35,12 @@ class AuthController extends Controller
             ]);
         }
     
+        // Change this to return 200 OK with a failure message
+        // instead of a 401 status code
         return response()->json([
             'status' => false,
             'message' => 'Username atau password salah'
-        ], 401);
+        ], 200); // Changed from 401 to 200
     }
     
     
