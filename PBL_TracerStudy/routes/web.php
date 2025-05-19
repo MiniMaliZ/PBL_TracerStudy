@@ -7,7 +7,6 @@ use App\Http\Controllers\PertanyaanController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AlumniController;
-use App\Http\Controllers\PertanyaanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TCFormController;
 
