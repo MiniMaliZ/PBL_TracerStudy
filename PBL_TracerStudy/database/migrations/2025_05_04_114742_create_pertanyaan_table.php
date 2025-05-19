@@ -10,6 +10,7 @@ return new class extends Migration {
             $table->id('id_pertanyaan');
             $table->text('isi_pertanyaan');
             $table->enum('kategori', ['tracer', 'pengguna_lulusan', 'umum']);
+            $table->enum('metodejawaban', ['1', '2',]);
             $table->unsignedBigInteger('created_by'); // FK ke admin
             $table->foreign('created_by')->references('id_admin')->on('admin');
         });

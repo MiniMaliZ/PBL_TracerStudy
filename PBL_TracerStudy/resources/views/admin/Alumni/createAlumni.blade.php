@@ -35,7 +35,13 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="tgl_lulus">Tanggal Lulus</label>
-                        <input type="date" name="tgl_lulus" id="tgl_lulus" class="form-control">
+                        <input type="date" name="tgl_lulus" id="tgl_lulus" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="tahun_masuk">Tahun Angkatan</label>
+                        <input type="text" name="tahun_masuk" id="tahun_masuk" class="form-control" required>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -103,6 +109,10 @@
                         <input type="email" name="email_atasan" id="email_atasan" class="form-control">
                     </div>
                 </div>
+            </div>
+
+            <h5 class="mt-4 mb-3">Detail Instansi</h5>
+            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nama_instansi">Nama Instansi</label>
@@ -124,9 +134,9 @@
                     <div class="form-group">
                         <label for="skala_instansi">Skala Instansi</label>
                         <select name="skala_instansi" id="skala_instansi" class="form-control">
-                            <option value="Local">Local</option>
-                            <option value="National">National</option>
-                            <option value="International">International</option>
+                            <option value="Wirausaha">Wirausaha</option>
+                            <option value="Nasional">Nasional</option>
+                            <option value="Multinasional">Multinasional</option>
                         </select>
                     </div>
                 </div>

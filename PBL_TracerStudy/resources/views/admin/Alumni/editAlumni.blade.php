@@ -41,6 +41,12 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
+                        <label for="tahun_masuk">Tahun Angkatan</label>
+                        <input type="text" name="tahun_masuk" id="tahun_masuk" class="form-control" value="{{ $alumni->tahun_masuk }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" name="email" id="email" class="form-control" value="{{ $alumni->email }}">
                     </div>
@@ -104,20 +110,24 @@
                         <input type="email" name="email_atasan" id="email_atasan" class="form-control" value="{{ $alumni->penggunaLulusan->email_atasan ?? '' }}">
                     </div>
                 </div>
+            </div>
+
+            <h5 class="mt-4 mb-3">Detail Instansi</h5>
+            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nama_instansi">Nama Instansi</label>
-                        <input type="text" name="nama_instansi" id="nama_instansi" class="form-control" value="{{ $alumni->penggunaLulusan->nama_instansi ?? '' }}">
+                        <input type="text" name="nama_instansi" id="nama_instansi" class="form-control" value="{{ $alumni->instansi->nama_instansi ?? '' }}">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="jenis_instansi">Jenis Instansi</label>
                         <select name="jenis_instansi" id="jenis_instansi" class="form-control">
-                            <option value="Pendidikan Tinggi" {{ $alumni->penggunaLulusan->jenis_instansi == 'Pendidikan Tinggi' ? 'selected' : '' }}>Pendidikan Tinggi</option>
-                            <option value="Instansi Pemerintah" {{ $alumni->penggunaLulusan->jenis_instansi == 'Instansi Pemerintah' ? 'selected' : '' }}>Instansi Pemerintah</option>
-                            <option value="BUMN" {{ $alumni->penggunaLulusan->jenis_instansi == 'BUMN' ? 'selected' : '' }}>BUMN</option>
-                            <option value="Perusahaan Swasta" {{ $alumni->penggunaLulusan->jenis_instansi == 'Perusahaan Swasta' ? 'selected' : '' }}>Perusahaan Swasta</option>
+                            <option value="Pendidikan Tinggi" {{ $alumni?->instansi?->jenis_instansi == 'Pendidikan Tinggi' ? 'selected' : '' }}>Pendidikan Tinggi</option>
+                            <option value="Instansi Pemerintah" {{ $alumni?->instansi?->jenis_instansi == 'Instansi Pemerintah' ? 'selected' : '' }}>Instansi Pemerintah</option>
+                            <option value="BUMN" {{ $alumni?->instansi?->jenis_instansi == 'BUMN' ? 'selected' : '' }}>BUMN</option>
+                            <option value="Perusahaan Swasta" {{ $alumni?->instansi?->jenis_instansi == 'Perusahaan Swasta' ? 'selected' : '' }}>Perusahaan Swasta</option>
                         </select>
                     </div>
                 </div>
@@ -125,22 +135,22 @@
                     <div class="form-group">
                         <label for="skala_instansi">Skala Instansi</label>
                         <select name="skala_instansi" id="skala_instansi" class="form-control">
-                            <option value="Local" {{ $alumni->penggunaLulusan->skala_instansi == 'Local' ? 'selected' : '' }}>Local</option>
-                            <option value="National" {{ $alumni->penggunaLulusan->skala_instansi == 'National' ? 'selected' : '' }}>National</option>
-                            <option value="International" {{ $alumni->penggunaLulusan->skala_instansi == 'International' ? 'selected' : '' }}>International</option>
+                            <option value="Wirausaha" {{ $alumni?->instansi?->skala_instansi == 'Wirausaha' ? 'selected' : '' }}>Wirausaha</option>
+                            <option value="Nasional" {{ $alumni?->instansi?->skala_instansi == 'Nasional' ? 'selected' : '' }}>Nasional</option>
+                            <option value="Multinasional" {{ $alumni?->instansi?->skala_instansi == 'Multinasional' ? 'selected' : '' }}>Multinasional</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="lokasi_instansi">Lokasi Instansi</label>
-                        <input type="text" name="lokasi_instansi" id="lokasi_instansi" class="form-control" value="{{ $alumni->penggunaLulusan->lokasi_instansi ?? '' }}">
+                        <input type="text" name="lokasi_instansi" id="lokasi_instansi" class="form-control" value="{{ $alumni?->instansi?->lokasi_instansi ?? '' }}">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="no_hp_instansi">No HP Instansi</label>
-                        <input type="text" name="no_hp_instansi" id="no_hp_instansi" class="form-control" value="{{ $alumni->penggunaLulusan->no_hp_instansi ?? '' }}">
+                        <input type="text" name="no_hp_instansi" id="no_hp_instansi" class="form-control" value="{{ $alumni?->instansi?->no_hp_instansi ?? '' }}">
                     </div>
                 </div>
             </div>
