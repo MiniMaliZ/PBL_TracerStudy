@@ -21,7 +21,7 @@
             <div>
                 <a href="{{ route('alumni.create') }}" class="btn btn-primary">Tambah Data</a>
                 <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalImport">Import Alumni</button>
-                {{-- <a href="{{ route('alumni.export') }}" class="btn btn-outline-success">Export Excel</a> --}}
+                <a href="{{ route('alumni.export') }}" class="btn btn-outline-success">Export Excel</a>
             </div>
         </div>
 
