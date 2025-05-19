@@ -10,5 +10,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(AdminSeeder::class); // Tambahkan AdminSeeder
         $this->call(PertanyaanSeeder::class); // Pastikan PertanyaanSeeder juga dipanggil
+        // $this->call(AlumniSeeder::class); // Tambahkan AlumniSeeder
     }
 }
