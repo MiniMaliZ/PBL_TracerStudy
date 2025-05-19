@@ -3,13 +3,12 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\PertanyaanController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AlumniController;
-
 use App\Http\Controllers\PertanyaanController;
-
 use App\Http\Controllers\AuthController;
-
 use App\Http\Controllers\TCFormController;
 
 
@@ -58,6 +57,16 @@ Route::get('/pertanyaan/{id}/edit', [PertanyaanController::class, 'edit'])->name
 Route::put('/pertanyaan/{id}', [PertanyaanController::class, 'update'])->name('pertanyaan.update');
 Route::delete('/pertanyaan/{id}', [PertanyaanController::class, 'destroy'])->name('pertanyaan.destroy');
 
+Route::get('/import',[ImportController::class,'index'])->name('import.index'); 
+Route::get('/list',[ImportController::class,'list']); 
+Route::get('/import-form', [ImportController::class, 'import']); // Halaman form upload
+Route::post('/import_ajax', [ImportController::class, 'import_ajax'])->name('import_ajax');
+Route::post('/import_excel', [ImportController::class, 'import_excel']);
+Route::get('/export_excel', [ImportController::class, 'export_excel']);
+Route::get('/import/{nim}/edit_ajax', [ImportController::class, 'edit_ajax']);
+Route::put('/import/{nim}/update_ajax', [ImportController::class, 'update_ajax']);
+Route::delete('/import/{nim}/delete_ajax', [ImportController::class, 'delete_ajax']);
+
 // Route::resource('alumni', AlumniController::class);// Routes untuk tabel Alumni
 Route::get('/alumni', [AlumniController::class, 'index'])->name('alumni.index');
 Route::get('/alumni/create', [AlumniController::class, 'create'])->name('alumni.create');
@@ -65,6 +74,9 @@ Route::post('/alumni', [AlumniController::class, 'store'])->name('alumni.store')
 Route::get('/alumni/{nim}/edit', [AlumniController::class, 'edit'])->name('alumni.edit');
 Route::put('/alumni/{nim}', [AlumniController::class, 'update'])->name('alumni.update');
 Route::delete('/alumni/{nim}', [AlumniController::class, 'destroy'])->name('alumni.destroy');
+Route::get('/alumni/export', [AlumniController::class, 'export_excel'])->name('alumni.export');
+Route::post('/alumni/import', [AlumniController::class, 'import_ajax'])->name('alumni.import_ajax');
+
 
 // Routes untuk tabel Admin
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');

@@ -4,17 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Alumni extends Model
 {
     use HasFactory;
-
     protected $table = 'alumni'; // Nama tabel
     protected $primaryKey = 'nim'; // Primary key
     public $incrementing = false; // Karena primary key bukan auto-increment
     public $timestamps = false; // Nonaktifkan timestamps
 
-    protected $fillable = [
+    protected $fillable = [ 
         'nim',
         'nama_alumni',
         'prodi',
