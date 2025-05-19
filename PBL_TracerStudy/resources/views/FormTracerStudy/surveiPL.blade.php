@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey Pengguna Lulusan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         html,
         body {
@@ -129,30 +131,6 @@
             transform: scale(1.2);
         }
 
-        .rating-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 5px;
-            /* Kurangi gap */
-        }
-
-        .rating-options {
-            display: flex;
-            gap: 0.1px;
-            /* Kurangi gap antara input radio */
-            flex: 1;
-            justify-content: center;
-        }
-
-        .rating-label {
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            margin: 0;
-            /* Menghilangkan margin untuk merapatkan dengan radio */
-        }
-
         .button-group {
             display: flex;
             justify-content: center;
@@ -192,6 +170,96 @@
 </head>
 
 <body>
+
+    <script>
+        $(document).ready(function() {
+            // Auto isi data alumni
+            $('#nama_alumni').on('input', function() {
+                var nama = $(this).val();
+                if (nama.length >= 3) {
+                    $.ajax({
+                        url: '/tracerstudy/get-alumni-data/' + encodeURIComponent(nama),
+                        method: 'GET',
+                        success: function(data) {
+                            if (data) {
+                                $('#prodi').val(data.prodi);
+                                $('#tgl_lulus').val(data.tgl_lulus);
+                            } else {
+                                $('#prodi').val('');
+                                $('#tgl_lulus').val('');
+                            }
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data berdasarkan nama alumni.');
+                        }
+                    });
+                }
+            });
+
+            // Auto isi data pengguna lulusan (atasan)
+            $('#nama_atasan').on('input', function() {
+                var nama = $(this).val();
+                if (nama.length >= 3) {
+                    $.ajax({
+                        url: '/tracerstudy/get-pl-data/' + encodeURIComponent(nama),
+                        method: 'GET',
+                        success: function(data) {
+                            if (data) {
+                                $('#jabatan_atasan').val(data.jabatan_atasan);
+                                $('#email_atasan').val(data.email_atasan);
+                            } else {
+                                $('#jabatan_atasan').val('');
+                                $('#email_atasan').val('');
+                            }
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data berdasarkan nama atasan.');
+                        }
+                    });
+                }
+            });
+
+            // Submit form dengan AJAX
+            $('form').on('submit', function(e) {
+                e.preventDefault(); // Mencegah reload
+
+                let form = $(this);
+                let formData = form.serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: form.attr('action'),
+                    data: formData,
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: response.message,
+                            confirmButtonColor: '#007649',
+                        }).then(() => {
+                            window.location.href = response.redirect;
+                        });
+                    },
+                    error: function(xhr) {
+                        let msg = 'Terjadi kesalahan.';
+                        if (xhr.status === 409 && xhr.responseJSON?.error) {
+                            msg = xhr.responseJSON.error;
+                        } else if (xhr.responseJSON?.error) {
+                            msg = xhr.responseJSON.error;
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: msg,
+                            confirmButtonColor: '#d33',
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
     <header class="container d-flex align-items-center py-2 border-bottom">
         <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}">
         <div style="line-height: 1.2;">
@@ -201,148 +269,92 @@
     </header>
 
     <main>
-        <form class="form-container" action="" method="POST">
+        <form class="form-container" action="{{ route('survey.store') }}" method="POST">
+            @csrf
             <h1>Survey</h1>
 
             <!-- Pengguna Lulusan -->
             <div class="form-section">
                 <h2>Pengguna Lulusan</h2>
-                <label for="nama_pl">Nama</label>
-                <input type="text" id="nama_pl" name="nama_pl" required>
+                <div class="form-group">
+                    <label for="nama_atasan" class="form-label">Nama</label>
+                    <input list="daftar_nama" class="form-control" id="nama_atasan" name="nama_atasan" required>
+                    <datalist id="daftar_nama">
+                        @foreach ($namaAtasan as $pl)
+                            <option value="{{ $pl->nama_atasan }}">
+                        @endforeach
+                    </datalist>
+                </div>
 
-                <label for="instansi">Instansi</label>
-                <input type="text" id="instansi" name="instansi" required>
+                <div class="form-group">
+                    <label for="instansi">Instansi</label>
+                    <input type="text" id="instansi" name="instansi" class="form-control" required>
+                </div>
 
-                <label for="jabatan">Jabatan</label>
-                <input type="text" id="jabatan" name="jabatan" required>
+                <div class="form-group">
+                    <label for="jabatan_atasan">Jabatan</label>
+                    <input type="text" id="jabatan_atasan" name="jabatan_atasan" class="form-control" required>
+                </div>
 
-                <label for="email_pl">Email</label>
-                <input type="email" id="email_pl" name="email_pl" required>
+                <div class="form-group">
+                    <label for="email_atasan">Email</label>
+                    <input type="email" id="email_atasan" name="email_atasan" class="form-control" required>
+                </div>
             </div>
 
             <!-- Alumni -->
             <div class="form-section">
                 <h2>Alumni</h2>
-                <label for="nama_alumni">Nama</label>
-                <input type="text" id="nama_alumni" name="nama_alumni" required>
+                <div class="form-group">
+                    <label for="nama_alumni">Nama</label>
+                    <input type="text" id="nama_alumni" name="nama_alumni" class="form-control" required>
+                </div>
 
                 <div class="form-row">
                     <div>
                         <label for="prodi">Program Studi</label>
-                        <input type="text" id="prodi" name="prodi" required>
+                        <input type="text" id="prodi" name="prodi" class="form-control" required>
                     </div>
                     <div>
-                        <label for="tgl_lulus">Tahun Lulus</label>
-                        <input type="text" id="tgl_lulus" name="tgl_lulus" required>
+                        <label for="tgl_lulus">Tanggal Lulus</label>
+                        <input type="date" id="tgl_lulus" name="tgl_lulus" class="form-control" required>
                     </div>
                 </div>
             </div>
 
             <!-- Penilaian -->
+            <!-- Penilaian (Radio Button) -->
             <div class="form-section">
                 <h2>Penilaian</h2>
 
-                <div class="mb-3">
-                    <label class="d-block">Kerjasama</label>
-                    <div class="rating-group">
-                        <span class="rating-label">Sangat Kurang</span>
-                        <div class="rating-options">
-                            <input type="radio" name="kerjasama" value="1">
-                            <input type="radio" name="kerjasama" value="2">
-                            <input type="radio" name="kerjasama" value="3">
-                            <input type="radio" name="kerjasama" value="4">
-                            <input type="radio" name="kerjasama" value="5">
+                @foreach ($pertanyaan->where('metodejawaban', 1) as $question)
+                    <div class="mb-3">
+                        <label class="d-block">{{ $question->isi_pertanyaan }}</label>
+                        <div class="rating-group">
+                            <span class="rating-label">Sangat Kurang</span>
+                            <div class="rating-options">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <input type="radio" name="jawaban[{{ $question->id_pertanyaan }}]"
+                                        value="{{ $i }}">
+                                @endfor
+                            </div>
+                            <span class="rating-label">Sangat Baik</span>
                         </div>
-                        <span class="rating-label">Sangat Baik</span>
                     </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="d-block">Keahlian bidang TI</label>
-                    <div class="rating-group">
-                        <span class="rating-label">Sangat Kurang</span>
-                        <div class="rating-options">
-                            <input type="radio" name="ti" value="1">
-                            <input type="radio" name="ti" value="2">
-                            <input type="radio" name="ti" value="3">
-                            <input type="radio" name="ti" value="4">
-                            <input type="radio" name="ti" value="5">
-                        </div>
-                        <span class="rating-label">Sangat Baik</span>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="d-block">Kemampuan bahasa asing</label>
-                    <div class="rating-group">
-                        <span class="rating-label">Sangat Kurang</span>
-                        <div class="rating-options">
-                            <input type="radio" name="kerjasama" value="1">
-                            <input type="radio" name="kerjasama" value="2">
-                            <input type="radio" name="kerjasama" value="3">
-                            <input type="radio" name="kerjasama" value="4">
-                            <input type="radio" name="kerjasama" value="5">
-                        </div>
-                        <span class="rating-label">Sangat Baik</span>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="d-block">Kemampuan Komunikasi</label>
-                    <div class="rating-group">
-                        <span class="rating-label">Sangat Kurang</span>
-                        <div class="rating-options">
-                            <input type="radio" name="kerjasama" value="1">
-                            <input type="radio" name="kerjasama" value="2">
-                            <input type="radio" name="kerjasama" value="3">
-                            <input type="radio" name="kerjasama" value="4">
-                            <input type="radio" name="kerjasama" value="5">
-                        </div>
-                        <span class="rating-label">Sangat Baik</span>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="d-block">Penegmbanagan diri</label>
-                    <div class="rating-group">
-                        <span class="rating-label">Sangat Kurang</span>
-                        <div class="rating-options">
-                            <input type="radio" name="kerjasama" value="1">
-                            <input type="radio" name="kerjasama" value="2">
-                            <input type="radio" name="kerjasama" value="3">
-                            <input type="radio" name="kerjasama" value="4">
-                            <input type="radio" name="kerjasama" value="5">
-                        </div>
-                        <span class="rating-label">Sangat Baik</span>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="d-block">Kepemimpinan</label>
-                    <div class="rating-group">
-                        <span class="rating-label">Sangat Kurang</span>
-                        <div class="rating-options">
-                            <input type="radio" name="kerjasama" value="1">
-                            <input type="radio" name="kerjasama" value="2">
-                            <input type="radio" name="kerjasama" value="3">
-                            <input type="radio" name="kerjasama" value="4">
-                            <input type="radio" name="kerjasama" value="5">
-                        </div>
-                        <span class="rating-label">Sangat Baik</span>
-                    </div>
-                </div>
-
+                @endforeach
             </div>
 
-            <!-- Teks Tambahan -->
-            <div class="mb-3">
-                <label for="kompetensi_belum_terpenuhi">Kompetensi yang dibutuhkan tapi belum dapat dipenuhi</label>
-                <textarea id="kompetensi_belum_terpenuhi" name="kompetensi_belum_terpenuhi" required></textarea>
-            </div>
+            <!-- Komentar atau Masukan (Textarea) -->
+            <div class="form-section">
+                <h2>Masukan</h2>
 
-            <div class="mb-3">
-                <label for="saran_kurikulum">Saran untuk kurikulum program studi</label>
-                <textarea id="saran_kurikulum" name="saran_kurikulum" required></textarea>
+                @foreach ($pertanyaan->where('metodejawaban', 2) as $question)
+                    <div class="mb-3">
+                        <label for="pertanyaan_{{ $question->id_pertanyaan }}">{{ $question->isi_pertanyaan }}</label>
+                        <textarea name="jawaban[{{ $question->id_pertanyaan }}]" id="pertanyaan_{{ $question->id_pertanyaan }}"
+                            class="form-control" rows="3"></textarea>
+                    </div>
+                @endforeach
             </div>
 
             <!-- Tombol -->
