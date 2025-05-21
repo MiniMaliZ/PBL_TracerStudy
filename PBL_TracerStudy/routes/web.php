@@ -45,9 +45,7 @@ Route::get('/', function () {
 // Route::get('reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
 // Route::post('reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
 
-Route::get('/dashboard', function () {
-    return view('admin.dashboard'); // Pastikan file ini ada
-})->name('dashboard');
+Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
 Route::get('/pertanyaan', [PertanyaanController::class, 'index'])->name('pertanyaan.index');
 Route::get('/pertanyaan/create', [PertanyaanController::class, 'create'])->name('pertanyaan.create');
