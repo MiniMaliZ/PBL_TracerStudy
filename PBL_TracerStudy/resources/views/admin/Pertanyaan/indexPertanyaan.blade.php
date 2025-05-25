@@ -15,6 +15,7 @@
                     <th>No</th>
                     <th>Isi Pertanyaan</th>
                     <th>Kategori</th>
+                    <th>Metode Jawaban</th>
                     <th>Created By</th>
                     <th>Actions</th>
                 </tr>
@@ -25,6 +26,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $item->isi_pertanyaan }}</td>
                     <td>{{ $item->kategori }}</td>
+                    <td>{{ $item->metodejawaban == '1' ? 'Penilaian' : 'Bukan Penilaian' }}</td>
                     <td>{{ $item->admin->nama ?? 'Tidak Diketahui' }}</td>
                     <td>
                         <a href="{{ route('pertanyaan.edit', $item->id_pertanyaan) }}" class="btn btn-sm btn-primary">Edit</a>
