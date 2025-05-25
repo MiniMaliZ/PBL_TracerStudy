@@ -1,4 +1,3 @@
-{{-- filepath: c:\laragon\www\PBL_TracerStudy\PBL_TracerStudy\resources\views\admin\create.blade.php --}}
 @extends('layouts.template')
 
 @section('title', 'Tambah Pertanyaan')
@@ -17,11 +16,22 @@
             </div>
             <div class="form-group">
                 <label for="kategori">Kategori</label>
-                <select name="kategori" id="kategori" class="form-control" required>
+                <select name="kategori" id="kategori" class="form-control" required onchange="toggleMetodeJawaban()">
                     <option value="tracer">Tracer</option>
                     <option value="pengguna_lulusan">Pengguna Lulusan</option>
                     <option value="umum">Umum</option>
                 </select>
+            </div>
+            <div class="form-group" id="metodejawabanGroup">
+                <label>Pertanyaan Penilaian ?</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="metodejawaban" id="metodejawaban1" value="1">
+                    <label class="form-check-label" for="metodejawaban1">Ya</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="metodejawaban" id="metodejawaban2" value="2" checked>
+                    <label class="form-check-label" for="metodejawaban2">Tidak</label>
+                </div>
             </div>
             <div class="form-group">
                 <label for="created_by">Dibuat Oleh</label>
@@ -36,4 +46,24 @@
         </form>
     </div>
 </div>
+
+<script>
+    function toggleMetodeJawaban() {
+        const kategori = document.getElementById('kategori').value;
+        const metodejawabanGroup = document.getElementById('metodejawabanGroup');
+        
+        if (kategori === 'pengguna_lulusan') {
+            metodejawabanGroup.style.display = 'block';
+        } else {
+            metodejawabanGroup.style.display = 'none';
+            // Set default value for non-pengguna_lulusan
+            document.getElementById('metodejawaban2').checked = true;
+        }
+    }
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleMetodeJawaban();
+    });
+</script>
 @endsection
