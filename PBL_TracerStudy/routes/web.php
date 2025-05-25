@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TCFormController;
+use App\Http\Controllers\InstansiController;
 
 
 /*
@@ -76,6 +77,7 @@ Route::delete('/alumni/{nim}', [AlumniController::class, 'destroy'])->name('alum
 Route::get('/alumni/export', [AlumniController::class, 'export_excel'])->name('alumni.export');
 Route::post('/alumni/import', [AlumniController::class, 'import_ajax'])->name('alumni.import_ajax');
 
+Route::resource('instansi', InstansiController::class);
 
 // Routes untuk tabel Admin
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
