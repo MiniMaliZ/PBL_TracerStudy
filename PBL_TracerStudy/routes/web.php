@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\PertanyaanController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PenggunaLulusanController;
 use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TCFormController;
@@ -78,6 +79,8 @@ Route::get('/alumni/export', [AlumniController::class, 'export_excel'])->name('a
 Route::post('/alumni/import', [AlumniController::class, 'import_ajax'])->name('alumni.import_ajax');
 
 Route::resource('instansi', InstansiController::class);
+
+Route::resource('penggunaLulusan', PenggunaLulusanController::class);
 
 // Routes untuk tabel Admin
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');

@@ -40,6 +40,14 @@
                     <span class="nav-link-text ms-1">Instansi</span>
                 </a>
             </li>
+            <!-- filepath: c:\laragon\www\PBL_TracerStudy\PBL_TracerStudy\resources\views\layouts\sidebar.blade.php -->
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('penggunaLulusan*') ? 'active bg-gradient-dark text-white' : '' }}"
+                    href="{{ route('penggunaLulusan.index') }}">
+                    <i class="material-symbols-rounded opacity-5">people</i>
+                    <span class="nav-link-text ms-1">Pengguna Lulusan</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link {{ Request::is('admin*') ? 'active bg-gradient-dark text-white' : '' }}"
                     href="{{ route('admin.index') }}">
