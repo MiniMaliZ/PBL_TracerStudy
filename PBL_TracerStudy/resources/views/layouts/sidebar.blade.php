@@ -22,7 +22,7 @@
             <li class="nav-item">
                 <a class="nav-link {{ Request::is('pertanyaan*') ? 'active bg-gradient-dark text-white' : '' }}"
                     href="{{ route('pertanyaan.index') }}">
-                    <i class="material-symbols-rounded opacity-5">table_view</i>
+                    <i class="material-symbols-rounded opacity-5">quiz</i>
                     <span class="nav-link-text ms-1">Pertanyaan</span>
                 </a>
             </li>
@@ -31,6 +31,21 @@
                     href="{{ route('alumni.index') }}">
                     <i class="material-symbols-rounded opacity-5">school</i>
                     <span class="nav-link-text ms-1">Alumni</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('instansi*') ? 'active bg-gradient-dark text-white' : '' }}"
+                    href="{{ route('instansi.index') }}">
+                    <i class="material-symbols-rounded opacity-5">corporate_fare</i>
+                    <span class="nav-link-text ms-1">Instansi</span>
+                </a>
+            </li>
+            <!-- filepath: c:\laragon\www\PBL_TracerStudy\PBL_TracerStudy\resources\views\layouts\sidebar.blade.php -->
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('penggunaLulusan*') ? 'active bg-gradient-dark text-white' : '' }}"
+                    href="{{ route('penggunaLulusan.index') }}">
+                    <i class="material-symbols-rounded opacity-5">people</i>
+                    <span class="nav-link-text ms-1">Pengguna Lulusan</span>
                 </a>
             </li>
             <li class="nav-item">

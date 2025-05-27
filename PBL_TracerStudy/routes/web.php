@@ -6,9 +6,11 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\PertanyaanController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PenggunaLulusanController;
 use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TCFormController;
+use App\Http\Controllers\InstansiController;
 
 
 /*
@@ -45,12 +47,8 @@ Route::get('/', function () {
 // Route::get('reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
 // Route::post('reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
 
-// Route::get('/dashboard', function () {
-//     return view('admin.dashboard'); // Pastikan file ini ada
-// })->name('dashboard');
-
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-
+Route::get('/dashboard-export_excel', [AdminDashboardController::class, 'export_excel']);
 
 Route::get('/pertanyaan', [PertanyaanController::class, 'index'])->name('pertanyaan.index');
 Route::get('/pertanyaan/create', [PertanyaanController::class, 'create'])->name('pertanyaan.create');
@@ -79,6 +77,9 @@ Route::delete('/alumni/{nim}', [AlumniController::class, 'destroy'])->name('alum
 Route::get('/alumni/export', [AlumniController::class, 'export_excel'])->name('alumni.export');
 Route::post('/alumni/import', [AlumniController::class, 'import_ajax'])->name('alumni.import_ajax');
 
+Route::resource('instansi', InstansiController::class);
+
+Route::resource('penggunaLulusan', PenggunaLulusanController::class);
 
 // Routes untuk tabel Admin
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');

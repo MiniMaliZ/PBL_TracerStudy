@@ -4,103 +4,165 @@
 
 @section('content')
     <div class="row">
-        <div class="col-lg-4 col-md-6 mt-4 mb-4">
+        <!-- PROFESI -->
+        <div class="col-lg-6 col-md-12 mt-4 mb-4">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="mb-0">Website Views</h6>
-                    <p class="text-sm">Last Campaign Performance</p>
+                    <h6 class="mb-0">Grafik Sebaran Profesi Lulusan</h6>
+                    <p class="text-sm">10 profesi tertinggi + kategori Lainnya</p>
                     <div class="pe-2">
-                        <canvas id="chart-bars" class="chart-canvas" height="170"></canvas>
-                    </div>
-                    <hr class="dark horizontal">
-                    <div class="d-flex">
-                        <i class="material-symbols-rounded text-sm my-auto me-1">schedule</i>
-                        <p class="mb-0 text-sm">Campaign sent 2 days ago</p>
+                        <canvas id="chart-profesi" class="chart-canvas" height="200"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 mt-4 mb-4">
+
+        <!-- INSTANSI -->
+        <div class="col-lg-6 col-md-12 mt-4 mb-4">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="mb-0">Daily Sales</h6>
-                    <p class="text-sm">Sales distribution</p>
+                    <h6 class="mb-0">Grafik Sebaran Jenis Instansi</h6>
+                    <p class="text-sm">Kategori: Pendidikan Tinggi, Instansi Pemerintah, Swasta, BUMN</p>
                     <div class="pe-2">
-                        <canvas id="chart-pie" class="chart-canvas" height="170"></canvas>
-                    </div>
-                    <hr class="dark horizontal">
-                    <div class="d-flex">
-                        <i class="material-symbols-rounded text-sm my-auto me-1">schedule</i>
-                        <p class="mb-0 text-sm">Updated 4 min ago</p>
+                        <canvas id="chart-instansi" class="chart-canvas" height="200"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 mt-4 mb-4">
+        <!-- TABEL KEPUASAN -->
+        <div class="col-12 mt-4 mb-4">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="mb-0">Completed Tasks</h6>
-                    <p class="text-sm">Last Campaign Performance</p>
-                    <div class="pe-2">
-                        <canvas id="chart-line-tasks" class="chart-canvas" height="170"></canvas>
-                    </div>
-                    <hr class="dark horizontal">
-                    <div class="d-flex">
-                        <i class="material-symbols-rounded text-sm my-auto me-1">schedule</i>
-                        <p class="mb-0 text-sm">Just updated</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row mt-4">
-        <div class="col-12">
-            <h6>Tabel Rata-Rata Masa Tunggu</h6>
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-info">
-                        <tr>
-                            <th>Tahun Lulus</th>
-                            <th>Jumlah Lulusan</th>
-                            <th>Jumlah Lulusan yang Terlacak</th>
-                            <th>Rata-rata Waktu Tunggu (Bulan)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $totalLulusan = 0;
-                            $totalTerlacak = 0;
-                            $totalMasaTunggu = 0;
-                            $totalPengisiMasaTunggu = 0;
-                        @endphp
-                        @if (isset($masaTunggu))
-                            @foreach ($masaTunggu as $row)
-                                <tr>
-                                    <td>{{ $row['tahun_lulus'] }}</td>
-                                    <td>{{ $row['jumlah_lulusan'] }}</td>
-                                    <td>{{ $row['jumlah_terlacak'] }}</td>
-                                    <td>{{ number_format($row['rata_rata_masa_tunggu'], 2) }}</td>
+                    <h6 class="mb-0">Tabel Penilaian Kepuasan Pengguna Lulusan</h6>
+                    <p class="text-sm">Persentase hasil input pengguna lulusan</p>
+                    <a href="{{ url('/dashboard-export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i>
+                        Export
+                        Excel</a>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="thead-dark">
+                                <tr class="text-center">
+                                    <th>No</th>
+                                    <th>Jenis Kemampuan</th>
+                                    <th>Sangat Baik (%)</th>
+                                    <th>Baik (%)</th>
+                                    <th>Cukup (%)</th>
+                                    <th>Kurang (%)</th>
+                                    <th>Sangat Kurang (%)</th>
                                 </tr>
+                            </thead>
+                            <tbody>
                                 @php
-                                    $totalLulusan += $row['jumlah_lulusan'];
-                                    $totalTerlacak += $row['jumlah_terlacak'];
-                                    $totalMasaTunggu += $row['total_masa_tunggu'];
-                                    $totalPengisiMasaTunggu += $row['pengisi_masa_tunggu'];
+                                    $totalSB = $totalB = $totalC = $totalK = $totalSK = 0;
                                 @endphp
-                            @endforeach
-                        @endif
-                    </tbody>
-                    <tfoot class="table-secondary">
-                        <tr>
-                            <th>Jumlah</th>
-                            <th>{{ $totalLulusan }}</th>
-                            <th>{{ $totalTerlacak }}</th>
-                            <th>
-                                {{ $totalPengisiMasaTunggu > 0 ? number_format($totalMasaTunggu / $totalPengisiMasaTunggu, 2) : 0 }}
-                            </th>
-                        </tr>
-                    </tfoot>
-                </table>
+                                @foreach ($kriteriaChartData as $index => $item)
+                                    @php
+                                        $data = $item['data'];
+                                        $total = array_sum($data);
+
+                                        $sb = $total ? ($data['Sangat Baik'] / $total) * 100 : 0;
+                                        $b = $total ? ($data['Baik'] / $total) * 100 : 0;
+                                        $c = $total ? ($data['Cukup'] / $total) * 100 : 0;
+                                        $k = $total ? ($data['Kurang'] / $total) * 100 : 0;
+                                        $sk = $total ? ($data['Sangat Kurang'] / $total) * 100 : 0;
+
+                                        $totalSB += $sb;
+                                        $totalB += $b;
+                                        $totalC += $c;
+                                        $totalK += $k;
+                                        $totalSK += $sk;
+                                    @endphp
+                                    <tr>
+                                        <td class="text-center">{{ $loop->iteration }}</td>
+                                        <td>{{ $item['label'] }}</td>
+                                        <td class="text-center">{{ number_format($sb, 2) }}</td>
+                                        <td class="text-center">{{ number_format($b, 2) }}</td>
+                                        <td class="text-center">{{ number_format($c, 2) }}</td>
+                                        <td class="text-center">{{ number_format($k, 2) }}</td>
+                                        <td class="text-center">{{ number_format($sk, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="text-center fw-bold">
+                                    <td colspan="2">Jumlah Rata-Rata</td>
+                                    <td>{{ number_format($totalSB / count($kriteriaChartData), 2) }}</td>
+                                    <td>{{ number_format($totalB / count($kriteriaChartData), 2) }}</td>
+                                    <td>{{ number_format($totalC / count($kriteriaChartData), 2) }}</td>
+                                    <td>{{ number_format($totalK / count($kriteriaChartData), 2) }}</td>
+                                    <td>{{ number_format($totalSK / count($kriteriaChartData), 2) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- TABEL Rata Rata Masa Tunggu -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h6>Tabel Rata-Rata Masa Tunggu</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-info">
+                            <tr>
+                                <th>Tahun Lulus</th>
+                                <th>Jumlah Lulusan</th>
+                                <th>Jumlah Lulusan yang Terlacak</th>
+                                <th>Rata-rata Waktu Tunggu (Bulan)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $totalLulusan = 0;
+                                $totalTerlacak = 0;
+                                $totalMasaTunggu = 0;
+                                $totalPengisiMasaTunggu = 0;
+                            @endphp
+                            @if (isset($masaTunggu))
+                                @foreach ($masaTunggu as $row)
+                                    <tr>
+                                        <td>{{ $row['tahun_lulus'] }}</td>
+                                        <td>{{ $row['jumlah_lulusan'] }}</td>
+                                        <td>{{ $row['jumlah_terlacak'] }}</td>
+                                        <td>{{ number_format($row['rata_rata_masa_tunggu'], 2) }}</td>
+                                    </tr>
+                                    @php
+                                        $totalLulusan += $row['jumlah_lulusan'];
+                                        $totalTerlacak += $row['jumlah_terlacak'];
+                                        $totalMasaTunggu += $row['total_masa_tunggu'];
+                                        $totalPengisiMasaTunggu += $row['pengisi_masa_tunggu'];
+                                    @endphp
+                                @endforeach
+                            @endif
+                        </tbody>
+                        <tfoot class="table-secondary">
+                            <tr>
+                                <th>Jumlah</th>
+                                <th>{{ $totalLulusan }}</th>
+                                <th>{{ $totalTerlacak }}</th>
+                                <th>
+                                    {{ $totalPengisiMasaTunggu > 0 ? number_format($totalMasaTunggu / $totalPengisiMasaTunggu, 2) : 0 }}
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Grafik Kepuasan Pengguna Lulusan -->
+        <div class="col-lg-4 col-md-12 mt-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="mb-0">Grafik Kepuasan Pengguna Lulusan</h6>
+                    <select id="kriteriaSelect" class="form-select mb-3">
+                        @foreach (array_keys($kriteriaChartData) as $key)
+                            <option value="{{ $key }}">{{ $kriteriaChartData[$key]['label'] }}</option>
+                        @endforeach
+                    </select>
+                    <canvas id="kriteriaChart" height="200"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -108,48 +170,20 @@
 
 @section('scripts')
     <script>
-        // Bar Chart
-        var ctx1 = document.getElementById("chart-bars").getContext("2d");
-        new Chart(ctx1, {
-            type: "bar",
-            data: {
-                labels: ["M", "T", "W", "T", "F", "S", "S"],
-                datasets: [{
-                    label: "Views",
-                    backgroundColor: "#43A047",
-                    data: [50, 45, 22, 28, 50, 60, 76],
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    },
-                    x: {
-                        beginAtZero: true
-                    },
-                },
-            },
-        });
-
-        // Pie Chart
-        var ctx2 = document.getElementById("chart-pie").getContext("2d");
-        new Chart(ctx2, {
+        // PROFESI
+        var ctxProfesi = document.getElementById("chart-profesi").getContext("2d");
+        new Chart(ctxProfesi, {
             type: "pie",
             data: {
-                labels: ["Electronics", "Clothing", "Home Appliances"],
+                labels: {!! json_encode($profesiLabels) !!},
                 datasets: [{
-                    label: "Sales",
-                    backgroundColor: ["#43A047", "#FF9800", "#E91E63"],
-                    data: [40, 30, 30],
-                }],
+                    label: "Jumlah",
+                    backgroundColor: [
+                        "#43A047", "#FF9800", "#E91E63", "#3F51B5", "#009688",
+                        "#9C27B0", "#00BCD4", "#8BC34A", "#FFC107", "#795548", "#607D8B"
+                    ],
+                    data: {!! json_encode($profesiData) !!}
+                }]
             },
             options: {
                 responsive: true,
@@ -157,41 +191,74 @@
                 plugins: {
                     legend: {
                         position: "top"
-                    },
-                },
-            },
+                    }
+                }
+            }
         });
 
-        // Line Chart
-        var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
-        new Chart(ctx3, {
-            type: "line",
+        // INSTANSI
+        var ctxInstansi = document.getElementById("chart-instansi").getContext("2d");
+        new Chart(ctxInstansi, {
+            type: "pie",
             data: {
-                labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                labels: {!! json_encode($instansiLabels) !!},
                 datasets: [{
-                    label: "Tasks",
-                    borderColor: "#43A047",
-                    data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-                    fill: false,
-                }],
+                    label: "Jumlah",
+                    backgroundColor: ["#2196F3", "#FF5722", "#9C27B0", "#4CAF50", "#FFEB3B"],
+                    data: {!! json_encode($instansiData) !!}
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false
-                    },
+                        position: "top"
+                    }
+                }
+            }
+        });
+        // Kepuasan per kriteria
+        const kriteriaChartData = {!! json_encode($kriteriaChartData) !!};
+
+        const ctxKriteria = document.getElementById('kriteriaChart').getContext('2d');
+        let chartInstance;
+
+        function renderChart(id) {
+            const data = kriteriaChartData[id].data;
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctxKriteria, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: kriteriaChartData[id].label,
+                        backgroundColor: ["#4CAF50", "#FFC107", "#FF9800", "#F44336", "#9E9E9E"],
+                        data: values
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    },
-                    x: {
-                        beginAtZero: true
-                    },
-                },
-            },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: "top"
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial chart
+        const defaultId = Object.keys(kriteriaChartData)[0];
+        renderChart(defaultId);
+
+        // Dropdown listener
+        document.getElementById('kriteriaSelect').addEventListener('change', function() {
+            renderChart(this.value);
         });
     </script>
 @endsection
