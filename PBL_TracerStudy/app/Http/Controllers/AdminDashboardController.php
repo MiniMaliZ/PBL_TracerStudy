@@ -6,10 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Models\Alumni;
 
 class AdminDashboardController extends Controller
 {
-     public function index()
+    public function index()
     {
         // PROFESI
         $profesi = DB::table('alumni')
@@ -70,14 +71,48 @@ class AdminDashboardController extends Controller
             ];
         }
 
+        $masaTunggu = $this->getMasaTungguTableData();
+
         return view('admin.dashboard', compact(
             'profesiLabels',
             'profesiData',
             'instansiLabels',
             'instansiData',
-            'kriteriaChartData'
+            'kriteriaChartData',
+            'masaTunggu'
         ));
     }
+
+    protected function getMasaTungguTableData()
+    {
+        $tahunLulus = Alumni::selectRaw('YEAR(tgl_lulus) as tahun')
+            ->whereNotNull('tgl_lulus')
+            ->orderBy('tahun')
+            ->distinct()
+            ->pluck('tahun');
+
+        $masaTunggu = [];
+        foreach ($tahunLulus as $tahun) {
+            $alumniTahun = Alumni::whereYear('tgl_lulus', $tahun);
+            $jumlahLulusan = $alumniTahun->count();
+            $jumlahTerlacak = (clone $alumniTahun)->whereNotNull('profesi')->count();
+            $pengisiMasaTunggu = (clone $alumniTahun)->whereNotNull('tanggal_kerja_pertama')->count();
+            $totalMasaTunggu = (clone $alumniTahun)->whereNotNull('tanggal_kerja_pertama')->sum('masa_tunggu');
+            $rataRataMasaTunggu = $pengisiMasaTunggu > 0 ? $totalMasaTunggu / $pengisiMasaTunggu : 0;
+
+            $masaTunggu[] = [
+                'tahun_lulus' => $tahun,
+                'jumlah_lulusan' => $jumlahLulusan,
+                'jumlah_terlacak' => $jumlahTerlacak,
+                'rata_rata_masa_tunggu' => $rataRataMasaTunggu,
+                'total_masa_tunggu' => $totalMasaTunggu,
+                'pengisi_masa_tunggu' => $pengisiMasaTunggu,
+            ];
+        }
+
+        return $masaTunggu;
+    }
+
     public function export_excel()
     {
         $spreadsheet = new Spreadsheet();
@@ -176,5 +211,4 @@ class AdminDashboardController extends Controller
         $writer->save('php://output');
         exit;
     }
-
 }
