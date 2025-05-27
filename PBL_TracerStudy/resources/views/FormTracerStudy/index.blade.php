@@ -198,7 +198,7 @@
                 <div class="row align-items-center" style="min-height: 500px;">
                     <!-- Kolom Gambar -->
                     <div class="col-md-6 position-relative">
-                        <img src="{{ asset('landingpageimg/Tracer-Logo.png') }}"
+                        <img src="{{ asset('landingpageimg/IMG_6875.png') }}"
                             alt="Tracer Study Illustration"
                             style="height: 500px; width: 100%; object-fit: contain; margin-bottom: 50px;">
                     </div>
@@ -288,68 +288,59 @@
             </p>
         </section>
         <!-- CTA Section -->
-        <section
-            style="background-color: #13754C;
-           color: white;
-           padding: 60px 0 40px 0;
-           margin-top: 60px;
-           position: relative;
-           overflow: hidden;
-           clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 100%);">
-            <div class="container text-center">
-                <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-5 mb-4">
-                    <h2 style="font-size: 2rem; font-weight: bold; margin: 0;">
-                        Partisipasi anda penting untuk<br>kemajuan pendidikan tinggi
-                    </h2>
-                    <a href="{{ route('form.opsi') }}" class="btn"
-                        style="background-color: #F7DC6F; color: #000; font-weight: 600; padding: 10px 30px; border-radius: 5px; font-size: 16px;">
-                        Isi Formulir
+      <footer style="background-color: #13754C; color: white; padding-top: 60px; margin-top: 60px; position: relative; overflow: hidden; clip-path: polygon(0 0, 100% 10%, 100% 100%, 0 100%);">
+    <div class="container text-center">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-5 mb-4">
+            <h2 style="font-size: 2rem; font-weight: bold; margin: 0;">
+                Partisipasi anda penting untuk<br>kemajuan pendidikan tinggi
+            </h2>
+            <a href="{{ route('form.opsi') }}" class="btn"
+                style="background-color: #F7DC6F; color: #000; font-weight: 600; padding: 10px 30px; border-radius: 5px; font-size: 16px;">
+                Isi Formulir
+            </a>
+        </div>
+        <div class="mx-auto" style="width: 85%"><hr></div>
+    </div>
+
+    <div class="container">
+        <div class="row py-4">
+            <!-- Logo dan Judul -->
+            <div class="col-md-4 mb-4">
+                <div class="d-flex align-items-center mb-3" style="gap: 10px; margin: 0; padding: 0;">
+                    <img src="{{ asset('landingpageimg/3186eafb-bdc8-461c-93ef-b3ac617a517c 3.png') }}"
+                        alt="Politeknik Negeri Malang Logo" style="width: 90px; height: 90px;">
+                    <div>
+                        <div class="fw-bold" style="font-size: 18px;">Tracer Study</div>
+                        <div>Politeknik Negeri Malang</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kontak -->
+            <div class="col-md-4 mb-4">
+                <h5 class="mb-3" style="font-weight: bold;">Kontak Kami</h5>
+                <p class="mb-1">Politeknik Negeri Malang, Jl. Soekarno Hatta</p>
+                <p class="mb-1">No.9, Jatimulyo, Kec. Lowokwaru, Kota Malang</p>
+                <p class="mb-1">(0341) 404424 / 404425</p>
+                <p class="mb-0">humas@polinema.ac.id</p>
+            </div>
+
+            <!-- Berita -->
+            <div class="col-md-4 mb-4">
+                <h5 class="mb-3" style="font-weight: bold;">Berita Terbaru</h5>
+                <p>
+                    Anda dapat mengakses berita terbaru mengenai Polinema
+                    <a href="https://www.polinema.ac.id/" class="text-white"
+                        style="text-decoration: underline;">
+                        disini
                     </a>
-                </div>
+                </p>
             </div>
-        </section>
-
-        <!-- Footer -->
-        <footer style="background-color: #13754C; color: white; padding: 0 0 00px 0;">
-            <div class="container">
-                <div class="row py-4">
-                    <!-- Logo dan Judul -->
-                    <div class="col-md-4 mb-4">
-                        <div class="d-flex align-items-center mb-3" style="gap: 10px; margin: 0; padding: 0;">
-                            <img src="{{ asset('landingpageimg/3186eafb-bdc8-461c-93ef-b3ac617a517c 3.png') }}"
-                                alt="Politeknik Negeri Malang Logo" style="width: 90px; height: 90px;">
-                            <div>
-                                <div class="fw-bold" style="font-size: 18px;">Tracer Study</div>
-                                <div>Politeknik Negeri Malang</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Kontak -->
-                    <div class="col-md-4 mb-4">
-                        <h5 class="mb-3" style="font-weight: bold;">Kontak Kami</h5>
-                        <p class="mb-1">Politeknik Negeri Malang, Jl. Soekarno Hatta</p>
-                        <p class="mb-1">No.9, Jatimulyo, Kec. Lowokwaru, Kota Malang</p>
-                        <p class="mb-1">(0341) 404424 / 404425</p>
-                        <p class="mb-0">humas@polinema.ac.id</p>
-                    </div>
-
-                    <!-- Berita -->
-                    <div class="col-md-4 mb-4">
-                        <h5 class="mb-3" style="font-weight: bold;">Berita Terbaru</h5>
-                        <p>
-                            Anda dapat mengakses berita terbaru mengenai Polinema
-                            <a href="https://www.polinema.ac.id/" class="text-white"
-                                style="text-decoration: underline;">
-                                disini
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
+        </div>
+    </div>
+</footer>
             <!-- Copyright -->
-            <div class="text-center mt-3" style="background-color: #F7DC6F; color: black; padding: 10px 0;">
+            <div class="text-center mt-0" style="background-color: #F7DC6F; color: black; padding: 10px 0;">
                 © 2025 Politeknik Negeri Malang. All Rights Reserved.
             </div>
         </footer>

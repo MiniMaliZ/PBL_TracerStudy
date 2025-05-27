@@ -9,6 +9,7 @@ use App\Models\PenggunaLulusan;
 use App\Models\Pertanyaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TCFormController extends Controller
 {
@@ -60,6 +61,13 @@ class TCFormController extends Controller
             return redirect()->back()->withErrors('Alumni tidak ditemukan.');
         }
 
+        if (!$request->tanggal_kerja_pertama || !$alumni->tgl_lulus) {
+            return redirect()->back()->withErrors('Tanggal kerja pertama atau tanggal lulus tidak tersedia.');
+        }
+        $tanggal_kerja_pertama = Carbon::parse($request->tanggal_kerja_pertama);
+        $tanggal_lulus = Carbon::parse($alumni->tgl_lulus);
+        $masa_tunggu = $tanggal_lulus->diffInDays($tanggal_kerja_pertama);
+
         $alumni->update([
             'no_hp' => $request->no_hp,
             'email' => $request->email,
@@ -68,6 +76,7 @@ class TCFormController extends Controller
             'tanggal_mulai_instansi' => $request->tanggal_mulai_instansi,
             'kategori_profesi' => $request->kategori_profesi,
             'profesi' => $request->profesi,
+            'masa_tunggu' =>  $masa_tunggu,
         ]);
 
         // Cek apakah instansi sudah ada (berdasarkan nama & lokasi)

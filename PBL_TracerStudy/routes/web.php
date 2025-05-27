@@ -19,10 +19,6 @@ use App\Http\Controllers\TCFormController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 // Tambahkan route untuk dashboard
 Route::get('/dashboard', function () {
     return view('admin.dashboard'); // Pastikan file ini ada
@@ -43,9 +39,11 @@ Route::get('/alumni/{nim}/edit', [AlumniController::class, 'edit'])->name('alumn
 Route::put('/alumni/{nim}', [AlumniController::class, 'update'])->name('alumni.update');
 Route::delete('/alumni/{nim}', [AlumniController::class, 'destroy'])->name('alumni.destroy');
 
+Route::get('/', [TCFormController::class, 'index']);
+
 Route::prefix('tracerstudy')->group(function () {
     //landing page
-    Route::get('/', [TCFormController::class, 'index']);
+
     //opsi form
     Route::get('/formopsi', [TCFormController::class, 'opsi'])->name("form.opsi");
 
