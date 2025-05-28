@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Models\Alumni;
+use App\Models\Instansi;
 
 class AdminDashboardController extends Controller
 {
@@ -72,6 +73,7 @@ class AdminDashboardController extends Controller
         }
 
         $masaTunggu = $this->getMasaTungguTableData();
+        $sebaranLingkup = $this->getSebaranLingkupProfesiData();
 
         return view('admin.dashboard', compact(
             'profesiLabels',
@@ -79,7 +81,8 @@ class AdminDashboardController extends Controller
             'instansiLabels',
             'instansiData',
             'kriteriaChartData',
-            'masaTunggu'
+            'masaTunggu',
+            'sebaranLingkup',
         ));
     }
 
@@ -211,4 +214,41 @@ class AdminDashboardController extends Controller
         $writer->save('php://output');
         exit;
     }
+
+    protected function getSebaranLingkupProfesiData()
+{
+    $tahunLulus = Alumni::selectRaw('YEAR(tgl_lulus) as tahun')
+        ->whereNotNull('tgl_lulus')
+        ->distinct()
+        ->orderBy('tahun')
+        ->pluck('tahun');
+
+    $data = [];
+
+    foreach ($tahunLulus as $tahun) {
+        $alumniTahun = Alumni::with('instansi')->whereYear('tgl_lulus', $tahun);
+
+        $jumlahLulusan = $alumniTahun->count();
+        $terlacak = (clone $alumniTahun)->whereNotNull('profesi')->count();
+        $bidangInfokom = (clone $alumniTahun)->where('kategori_profesi', 'Infokom')->count();
+        $bidangNonInfokom = (clone $alumniTahun)->where('kategori_profesi', 'Non Infokom')->count();
+        $internasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Internasional'))->count();
+        $nasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Nasional'))->count();
+        $wirausaha = (clone $alumniTahun)->where('kategori_profesi', 'Wirausaha')->count();
+
+        $data[] = [
+            'tahun' => $tahun,
+            'jumlah_lulusan' => $jumlahLulusan,
+            'terlacak' => $terlacak,
+            'infokom' => $bidangInfokom,
+            'non_infokom' => $bidangNonInfokom,
+            'internasional' => $internasional,
+            'nasional' => $nasional,
+            'wirausaha' => $wirausaha,
+        ];
+    }
+
+    return $data;
+}
+
 }

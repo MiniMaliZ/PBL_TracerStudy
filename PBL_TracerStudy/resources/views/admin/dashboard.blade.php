@@ -29,7 +29,125 @@
                 </div>
             </div>
         </div>
-        <!-- TABEL KEPUASAN -->
+
+        
+    <div class="container-fluid py-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h5 class="mb-1">Tabel Sebaran Lingkup Tempat Kerja dan Kesesuaian Profesi</h5>
+                    <p class="text-sm">Persentase hasil pelacakan alumni</p>
+                    <a href="{{ url('/dashboard-export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i>
+                        Export
+                        Excel</a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped text-center align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th rowspan="2">Tahun Lulus</th>
+                            <th rowspan="2">Jumlah Lulusan</th>
+                            <th rowspan="2">Jumlah Terlacak</th>
+                            <th colspan="2">Kesesuaian Profesi</th>
+                            <th colspan="3">Lingkup Tempat Kerja</th>
+                        </tr>
+                        <tr>
+                            <th>Infokom</th>
+                            <th>Non Infokom</th>
+                            <th>Internasional</th>
+                            <th>Nasional</th>
+                            <th>Wirausaha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($sebaranLingkup as $row)
+                        <tr>
+                            <td>{{ $row['tahun'] }}</td>
+                            <td>{{ $row['jumlah_lulusan'] }}</td>
+                            <td>{{ $row['terlacak'] }}</td>
+                            <td>{{ $row['infokom'] }}</td>
+                            <td>{{ $row['non_infokom'] }}</td>
+                            <td>{{ $row['internasional'] }}</td>
+                            <td>{{ $row['nasional'] }}</td>
+                            <td>{{ $row['wirausaha'] }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8">Data belum tersedia</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+     <div class="container-fluid py-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="mb-1">Tabel Rata-Rata Masa Tunggu</h5>
+            <p class="text-sm">Berdasarkan hasil pelacakan alumni</p>
+            <a href="{{ url('/dashboard-export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i>
+                Export
+                Excel</a>
+            <div class="table-responsive mt-3">
+                <table class="table table-bordered table-striped text-center align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tahun Lulus</th>
+                            <th>Jumlah Lulusan</th>
+                            <th>Jumlah Terlacak</th>
+                            <th>Rata-rata Masa Tunggu (Bulan)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $totalLulusan = 0;
+                            $totalTerlacak = 0;
+                            $totalMasaTunggu = 0;
+                            $totalPengisiMasaTunggu = 0;
+                        @endphp
+
+                        @if(isset($masaTunggu))
+                            @foreach($masaTunggu as $row)
+                                <tr>
+                                    <td>{{ $row['tahun_lulus'] }}</td>
+                                    <td>{{ $row['jumlah_lulusan'] }}</td>
+                                    <td>{{ $row['jumlah_terlacak'] }}</td>
+                                    <td>{{ number_format($row['rata_rata_masa_tunggu'], 2) }}</td>
+
+                                    @php
+                                        $totalLulusan += $row['jumlah_lulusan'];
+                                        $totalTerlacak += $row['jumlah_terlacak'];
+                                        $totalMasaTunggu += $row['total_masa_tunggu'];
+                                        $totalPengisiMasaTunggu += $row['pengisi_masa_tunggu'];
+                                    @endphp
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                    <tfoot class="table-secondary fw-semibold">
+                        <tr>
+                            <td>Jumlah</td>
+                            <td>{{ $totalLulusan }}</td>
+                            <td>{{ $totalTerlacak }}</td>
+                            <td>
+                                {{ $totalPengisiMasaTunggu > 0 ? number_format($totalMasaTunggu / $totalPengisiMasaTunggu, 2) : 0 }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+                <!-- TABEL KEPUASAN -->
         <div class="col-12 mt-4 mb-4">
             <div class="card">
                 <div class="card-body">
@@ -99,58 +217,6 @@
                 </div>
             </div>
         </div>
-        <!-- TABEL Rata Rata Masa Tunggu -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <h6>Tabel Rata-Rata Masa Tunggu</h6>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
-                        <thead class="table-info">
-                            <tr>
-                                <th>Tahun Lulus</th>
-                                <th>Jumlah Lulusan</th>
-                                <th>Jumlah Lulusan yang Terlacak</th>
-                                <th>Rata-rata Waktu Tunggu (Bulan)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php
-                                $totalLulusan = 0;
-                                $totalTerlacak = 0;
-                                $totalMasaTunggu = 0;
-                                $totalPengisiMasaTunggu = 0;
-                            @endphp
-                            @if (isset($masaTunggu))
-                                @foreach ($masaTunggu as $row)
-                                    <tr>
-                                        <td>{{ $row['tahun_lulus'] }}</td>
-                                        <td>{{ $row['jumlah_lulusan'] }}</td>
-                                        <td>{{ $row['jumlah_terlacak'] }}</td>
-                                        <td>{{ number_format($row['rata_rata_masa_tunggu'], 2) }}</td>
-                                    </tr>
-                                    @php
-                                        $totalLulusan += $row['jumlah_lulusan'];
-                                        $totalTerlacak += $row['jumlah_terlacak'];
-                                        $totalMasaTunggu += $row['total_masa_tunggu'];
-                                        $totalPengisiMasaTunggu += $row['pengisi_masa_tunggu'];
-                                    @endphp
-                                @endforeach
-                            @endif
-                        </tbody>
-                        <tfoot class="table-secondary">
-                            <tr>
-                                <th>Jumlah</th>
-                                <th>{{ $totalLulusan }}</th>
-                                <th>{{ $totalTerlacak }}</th>
-                                <th>
-                                    {{ $totalPengisiMasaTunggu > 0 ? number_format($totalMasaTunggu / $totalPengisiMasaTunggu, 2) : 0 }}
-                                </th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        </div>
         <!-- Grafik Kepuasan Pengguna Lulusan -->
         <div class="col-lg-4 col-md-12 mt-4 mb-4">
             <div class="card">
@@ -166,6 +232,7 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('scripts')

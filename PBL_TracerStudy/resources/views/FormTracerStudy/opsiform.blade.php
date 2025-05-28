@@ -173,7 +173,7 @@
     </div>
 
     <!-- Footer -->
-    <footer>
+    <footer style="margin-bottom: 0">
         &copy; 2025 Politeknik Negeri Malang. All Rights Reserved.
     </footer>
 
