@@ -20,4 +20,9 @@ class Instansi extends Model
         'lokasi_instansi',
         'no_hp_instansi',
     ];
+
+    public function alumni()
+    {
+        return $this->hasMany(Alumni::class, 'id_instansi', 'id_instansi');
+    }
 }

@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->foreign('id_instansi')
                 ->references('id_instansi')
                 ->on('instansi')
-                ->onDelete('set null'); // Jika pengguna_lulusan dihapus, set null
+                ->onDelete('set null'); // Jika id_instansi dihapus, set null
         });
     }
 

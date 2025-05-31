@@ -14,6 +14,13 @@
                     <i class="material-symbols-rounded">account_circle</i>
                 </a>
             </li>
+            <li>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit">Logout</button>
+                </form>
+            </li>
+            
         </ul>
     </div>
 </nav>

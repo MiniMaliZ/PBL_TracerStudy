@@ -4,17 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Alumni extends Model
 {
     use HasFactory;
-
     protected $table = 'alumni'; // Nama tabel
     protected $primaryKey = 'nim'; // Primary key
     public $incrementing = false; // Karena primary key bukan auto-increment
     public $timestamps = false; // Nonaktifkan timestamps
 
-    protected $fillable = [
+    protected $fillable = [ 
         'nim',
         'nama_alumni',
         'prodi',
@@ -23,8 +23,8 @@ class Alumni extends Model
         'tahun_masuk',
         'tgl_lulus',
         'tanggal_kerja_pertama',
-        'masa_tunggu',
         'tanggal_mulai_instansi',
+        'masa_tunggu',
         'kategori_profesi',
         'profesi',
         'id_pengguna_lulusan', // Foreign key ke tabel pengguna_lulusan
@@ -42,6 +42,6 @@ class Alumni extends Model
 
     public function instansi()
     {
-        return $this->belongsTo(PenggunaLulusan::class, 'id_instansi', 'id_instansi');
+        return $this->belongsTo(Instansi::class, 'id_instansi', 'id_instansi');
     }
 }

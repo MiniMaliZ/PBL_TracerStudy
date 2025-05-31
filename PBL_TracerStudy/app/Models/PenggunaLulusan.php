@@ -9,19 +9,15 @@ class PenggunaLulusan extends Model
 {
     use HasFactory;
 
-    protected $table = 'pengguna_lulusan'; // Nama tabel
-    protected $primaryKey = 'id_pengguna_lulusan'; // Primary key
-    public $timestamps = false; // Nonaktifkan timestamps
+
+    protected $table = 'pengguna_lulusan';
+    protected $primaryKey = 'id_pengguna_lulusan';
+    public $timestamps = false;
 
     protected $fillable = [
         'nama_atasan',
         'jabatan_atasan',
         'email_atasan',
-        'nama_instansi',
-        'jenis_instansi',
-        'skala_instansi',
-        'lokasi_instansi',
-        'no_hp_instansi',
     ];
 
     /**

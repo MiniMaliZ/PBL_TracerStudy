@@ -20,6 +20,17 @@ class Admin extends Authenticatable
         'nama',
     ];
 
+
+    public function getAuthIdentifierName()
+    {
+        return 'username';
+    }
+
+    protected $hidden = [
+        'password', // Sembunyikan password saat serialisasi
+    ];
+
+
     // Relasi ke tabel pertanyaan
     public function pertanyaan()
     {
