@@ -18,6 +18,7 @@ class PenggunaLulusan extends Model
         'nama_atasan',
         'jabatan_atasan',
         'email_atasan',
+        'otp',
     ];
 
     /**

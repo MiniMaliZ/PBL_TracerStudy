@@ -161,6 +161,8 @@
                 }
             });
 
+
+
             // AJAX submit form dengan SweetAlert
             $('#form-tracer').submit(function(e) {
                 e.preventDefault();
@@ -186,21 +188,20 @@
                         const redirectUrl = response.redirect;
 
                         // Generate OTP
-                        const otp = Math.floor(100000 + Math.random() * 900000);
-                        sessionStorage.setItem('otp', otp);
+
 
                         const email = $('#email_atasan').val();
 
                         // Kirim OTP via EmailJS
                         emailjs.send("service_v5sdml7", "template_kt3bb6z", {
                             to_email: email,
-                            otp_code: otp
+                            otp_code: $('#otp').val()
                         }).then(
                             () => {
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Form Berhasil Disimpan',
-                                    text: 'Kode OTP telah dikirim ke email Anda.',
+                                    text: 'Kode OTP telah dikirim ke email atasan anda.',
                                     confirmButtonText: 'OK'
                                 }).then(() => {
                                     // Sekarang redirect menggunakan URL dari Laravel
@@ -221,6 +222,14 @@
                 });
             });
         });
+
+        $(() => {
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            sessionStorage.setItem('otp', otp);
+            $('#otp').val(otp);
+            console.log("tess")
+            console.log($('#otp').val())
+        })
     </script>
 
 
@@ -362,6 +371,7 @@
                         <label for="email_atasan" class="form-label">Email Atasan</label>
                         <input type="email" class="form-control" id="email_atasan" name="email_atasan" required>
                     </div>
+                    <input type="hidden" name="otp" id="otp">
                 </div>
             </div>
 

@@ -9,6 +9,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #fff;
@@ -150,28 +162,31 @@
         </div>
     </div>
 
-    <!-- Card Section -->
-    <div class="card-wrapper">
-        <!-- Card 1: Alumni -->
-        <div class="info-card">
-            <img src="{{ asset('landingpageimg/happy students.png') }}" alt="Alumni Image" />
-            <h5>Alumni</h5>
-            <p style="margin-bottom: 35px; ">Pengguna yang telah lulus dari institusi dan mengisi form untuk memberikan
-                informasi terkait pekerjaan,
-                studi lanjutan, dan pengalaman pasca-kelulusan.</p>
-            <a class="btn-formulir btn btn-fill-form mb-5" href="{{ route('form.alumni') }}">Isi Formulir</a>
-        </div>
+    <main>
+        <!-- Card Section -->
+        <div class="card-wrapper">
+            <!-- Card 1: Alumni -->
+            <div class="info-card">
+                <img src="{{ asset('landingpageimg/happy students.png') }}" alt="Alumni Image" />
+                <h5>Alumni</h5>
+                <p style="margin-bottom: 35px; ">Pengguna yang telah lulus dari institusi dan mengisi form untuk
+                    memberikan
+                    informasi terkait pekerjaan,
+                    studi lanjutan, dan pengalaman pasca-kelulusan.</p>
+                <a class="btn-formulir btn btn-fill-form mb-5" href="{{ route('form.alumni') }}">Isi Formulir</a>
+            </div>
 
-        <!-- Card 2: Pengguna Lulusan -->
-        <div class="info-card">
-            <img src="{{ asset('landingpageimg/Office worker talking on phone.png') }}" alt="Employer Image" />
-            <h5>Pengguna Lulusan</h5>
-            <p>Pihak eksternal seperti perusahaan atau instansi yang mempekerjakan lulusan, bertujuan memberikan
-                penilaian terhadap kompetensi dan kinerja lulusan di tempat kerja.</p>
-            <a class="btn-formulir btn btn-fill-form mb-5" href="{{ route('form.penggunalulusan') }}">Isi Formulir</a>
+            <!-- Card 2: Pengguna Lulusan -->
+            <div class="info-card">
+                <img src="{{ asset('landingpageimg/Office worker talking on phone.png') }}" alt="Employer Image" />
+                <h5>Pengguna Lulusan</h5>
+                <p>Pihak eksternal seperti perusahaan atau instansi yang mempekerjakan lulusan, bertujuan memberikan
+                    penilaian terhadap kompetensi dan kinerja lulusan di tempat kerja.</p>
+                <a class="btn-formulir btn btn-fill-form mb-5" href="{{ route('otp.check') }}">Isi
+                    Formulir</a>
+            </div>
         </div>
-    </div>
-
+    </main>
     <!-- Footer -->
     <footer>
         &copy; 2025 Politeknik Negeri Malang. All Rights Reserved.

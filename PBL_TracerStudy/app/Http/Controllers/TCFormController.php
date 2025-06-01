@@ -68,17 +68,6 @@ class TCFormController extends Controller
         $tanggal_lulus = Carbon::parse($alumni->tgl_lulus);
         $masa_tunggu = $tanggal_lulus->diffInDays($tanggal_kerja_pertama);
 
-        $alumni->update([
-            'no_hp' => $request->no_hp,
-            'email' => $request->email,
-            'tahun_masuk' => $request->tahun_masuk,
-            'tanggal_kerja_pertama' => $request->tanggal_kerja_pertama,
-            'tanggal_mulai_instansi' => $request->tanggal_mulai_instansi,
-            'kategori_profesi' => $request->kategori_profesi,
-            'profesi' => $request->profesi,
-            'masa_tunggu' =>  $masa_tunggu,
-        ]);
-
         // Cek apakah instansi sudah ada (berdasarkan nama & lokasi)
         $instansi = Instansi::where('nama_instansi', $request->nama_instansi)
             ->where('lokasi_instansi', $request->lokasi_instansi)
@@ -97,15 +86,32 @@ class TCFormController extends Controller
 
         // Cek apakah atasan sudah ada (berdasarkan email atasan)
         $atasan = PenggunaLulusan::where('email_atasan', $request->email_atasan)->first();
-
         // Jika tidak ada, buat baru
         if (!$atasan) {
             PenggunaLulusan::create([
                 'nama_atasan' => $request->nama_atasan,
                 'jabatan_atasan' => $request->jabatan_atasan,
                 'email_atasan' => $request->email_atasan,
+                'otp' => $request->otp,
+            ]);
+        } else {
+            $atasan->update([
+                'otp' => $request->otp,
             ]);
         }
+
+        $alumni->update([
+            'no_hp' => $request->no_hp,
+            'email' => $request->email,
+            'tahun_masuk' => $request->tahun_masuk,
+            'tanggal_kerja_pertama' => $request->tanggal_kerja_pertama,
+            'tanggal_mulai_instansi' => $request->tanggal_mulai_instansi,
+            'kategori_profesi' => $request->kategori_profesi,
+            'profesi' => $request->profesi,
+            'id_instansi' =>  $instansi->id_instansi,
+            'id_pengguna_lulusan' =>  $atasan->id_pengguna_lulusan,
+            'masa_tunggu' =>  $masa_tunggu,
+        ]);
 
         return response()->json([
             'message' => 'Terimakasih, data berhasil disimpan',
@@ -185,6 +191,37 @@ class TCFormController extends Controller
             return response()->json([
                 'error' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function otpcheck()
+    {
+        return view('FormTracerStudy.otpcheck');
+    }
+
+    public function otpvalidation(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string'
+        ]);
+
+        $email = $request->input('email');
+        $inputOtp = $request->input('otp');
+
+        // Cek data dari tabel berdasarkan email atasan
+        $data = PenggunaLulusan::where('email_atasan', $email)->first();
+
+        if (!$data) {
+            return redirect()->back()->with('error', 'Email atasan tidak ditemukan.');
+        }
+
+        if ($inputOtp === $data->otp) {
+
+            return redirect()->route('form.penggunalulusan')->with('success', 'OTP berhasil diverifikasi.');
+        } else {
+            return redirect()->back()->with('error', 'Kode OTP salah. Silakan coba lagi.');
         }
     }
 }

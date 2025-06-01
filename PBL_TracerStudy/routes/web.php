@@ -57,8 +57,8 @@ Route::get('/pertanyaan/{id}/edit', [PertanyaanController::class, 'edit'])->name
 Route::put('/pertanyaan/{id}', [PertanyaanController::class, 'update'])->name('pertanyaan.update');
 Route::delete('/pertanyaan/{id}', [PertanyaanController::class, 'destroy'])->name('pertanyaan.destroy');
 
-Route::get('/import',[ImportController::class,'index'])->name('import.index'); 
-Route::get('/list',[ImportController::class,'list']); 
+Route::get('/import', [ImportController::class, 'index'])->name('import.index');
+Route::get('/list', [ImportController::class, 'list']);
 Route::get('/import-form', [ImportController::class, 'import']); // Halaman form upload
 Route::post('/import_ajax', [ImportController::class, 'import_ajax'])->name('import_ajax');
 Route::post('/import_excel', [ImportController::class, 'import_excel']);
@@ -101,14 +101,12 @@ Route::prefix('tracerstudy')->group(function () {
     Route::get('/get-alumni-data/{keyword}', [TCFormController::class, 'getAlumniData']); // mengisi data otomatis 
     Route::post('/formulir/{nim}', [TCFormController::class, 'create_form'])->name('formulir.store'); // menyimpan data form tracer study 
 
-    //otp
-    Route::get('formopsi/otp/{email}', [TCFormController::class, 'viewotp'])->name("otpvalidation");
-    Route::post('formopsi/otp/verify-otp', [TCFormController::class, 'verifyOtp'])->name('verify.otp');
-
+    //otp validation
+    Route::get('/formopsi/otpcheck', [TCFormController::class, 'otpcheck'])->name('otp.check');
+    Route::post('/formopsi/otpvalidation', [TCFormController::class, 'otpvalidation'])->name('otp.validation');
 
     //form penggunalulusan 
     Route::get('/formopsi/formpenggunalulusan', [TCFormController::class, 'surveiPL'])->name("form.penggunalulusan");
-    Route::get('/get-pl-data/{nama}', [TCFormController::class, 'getPL']);// mengisi data otomatis 
+    Route::get('/get-pl-data/{nama}', [TCFormController::class, 'getPL']); // mengisi data otomatis 
     Route::post('/tracerstudy/store', [TCFormController::class, 'create_PL'])->name('survey.store');
-
 });
