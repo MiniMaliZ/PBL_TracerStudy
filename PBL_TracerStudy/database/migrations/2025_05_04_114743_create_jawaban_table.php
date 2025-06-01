@@ -5,10 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public function up(): void {
+    public function up(): void
+    {
         Schema::create('jawaban', function (Blueprint $table) {
             $table->id('id_jawaban');
-            $table->unsignedBigInteger('id_survei');
+            $table->unsignedBigInteger('id_survei')->nullable();
             $table->unsignedBigInteger('id_pertanyaan');
             $table->string('nim_alumni', 20)->nullable(); // jika diisi alumni
             $table->unsignedBigInteger('id_pengguna_lulusan')->nullable(); // jika diisi pengguna lulusan
@@ -22,7 +23,8 @@ return new class extends Migration {
         });
     }
 
-    public function down(): void {
+    public function down(): void
+    {
         Schema::dropIfExists('jawaban');
     }
 };
