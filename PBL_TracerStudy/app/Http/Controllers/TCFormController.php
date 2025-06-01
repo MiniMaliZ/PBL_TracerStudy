@@ -170,8 +170,31 @@ class TCFormController extends Controller
                 ], 409); // 409 = Conflict
             }
 
+            // Ambil semua pertanyaan dengan metodejawaban = 1 (radio)
+            $requiredQuestions = Pertanyaan::where('metodejawaban', 1)->pluck('id_pertanyaan');
+
+            // Validasi apakah semua pertanyaan wajib diisi ada dalam input
+            foreach ($requiredQuestions as $id) {
+                if (!isset($request->jawaban[$id])) {
+                    return response()->json([
+                        'error' => 'Semua pertanyaan pilihan wajib diisi.'
+                    ], 422); // 422 = Unprocessable Entity
+                }
+            }
+
             // Simpan jawaban
             foreach ($request->jawaban as $id_pertanyaan => $isi_jawaban) {
+                $pertanyaan = Pertanyaan::find($id_pertanyaan);
+
+                if (!$pertanyaan) {
+                    continue; // Lewati jika pertanyaan tidak ditemukan
+                }
+
+                // Jika metodejawaban 2 (textarea), dan jawaban kosong, lewati
+                if ($pertanyaan->metodejawaban == 2 && (is_null($isi_jawaban) || trim($isi_jawaban) === '')) {
+                    continue;
+                }
+
                 Jawaban::create([
                     'id_pertanyaan'       => $id_pertanyaan,
                     'jawaban'             => $isi_jawaban,
