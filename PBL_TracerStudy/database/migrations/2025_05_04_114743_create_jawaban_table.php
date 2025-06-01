@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->text('jawaban');
             $table->timestamp('answered_at')->useCurrent();
 
-            $table->foreign('id_survei')->references('id_survei')->on('survei');
+            $table->foreign('id_survei')->references('id_survei')->on('survei')->nullOnDelete();
             $table->foreign('id_pertanyaan')->references('id_pertanyaan')->on('pertanyaan');
             $table->foreign('nim_alumni')->references('nim')->on('alumni')->nullOnDelete();
             $table->foreign('id_pengguna_lulusan')->references('id_pengguna_lulusan')->on('pengguna_lulusan')->nullOnDelete();
