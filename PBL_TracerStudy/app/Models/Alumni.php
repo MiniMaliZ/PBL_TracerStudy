@@ -14,7 +14,7 @@ class Alumni extends Model
     public $incrementing = false; // Karena primary key bukan auto-increment
     public $timestamps = false; // Nonaktifkan timestamps
 
-    protected $fillable = [ 
+    protected $fillable = [
         'nim',
         'nama_alumni',
         'prodi',
@@ -43,5 +43,10 @@ class Alumni extends Model
     public function instansi()
     {
         return $this->belongsTo(Instansi::class, 'id_instansi', 'id_instansi');
+    }
+
+    public function jawaban()
+    {
+        return $this->hasOne(Jawaban::class, 'nim_alumni', 'nim');
     }
 }
