@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Font;
 class AlumniController extends Controller
 {
     // Menampilkan data dalam tabel
@@ -222,57 +224,122 @@ public function import_ajax(Request $request)
 }
 
 
-// Tambahkan fungsi bantu ini dalam controller
-private function convertExcelDate($value)
-{
-    if (!$value) return null;
-
-    try {
-        if (is_numeric($value)) {
-            return Date::excelToDateTimeObject($value)->format('Y-m-d');
-        } else {
-            return \Carbon\Carbon::parse($value)->format('Y-m-d');
-        }
-    } catch (\Exception $e) {
-        return null;
-    }
-}
-
-    public function export_excel()
+    // Tambahkan fungsi bantu ini dalam controller
+    private function convertExcelDate($value)
     {
-        $alumni = Alumni::orderBy('prodi')->get();
+        if (!$value) return null;
+
+        try {
+            if (is_numeric($value)) {
+                return Date::excelToDateTimeObject($value)->format('Y-m-d');
+            } else {
+                return \Carbon\Carbon::parse($value)->format('Y-m-d');
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+        public function export_excel(Request $request)
+    {
+        $status = $request->status;
+
+        if (!in_array($status, ['sudah', 'belum'])) {
+            return redirect()->back()->with('error', 'Status tidak valid atau belum dipilih.');
+        }
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Header
-        $sheet->fromArray([
-            ['No', 'NIM', 'Nama Alumni', 'Prodi', 'No HP', 'Email','tahun_masuk','tgl_lulus','tanggal_kerja_pertama','tanggal_mulai_instansi',]
-        ], null, 'A1');
+        // ======================== JIKA BELUM MENGISI ========================
+        if ($status === 'belum') {
+            $alumni = Alumni::whereNull('tanggal_kerja_pertama')->orderBy('prodi')->get();
 
-        $row = 2;
-        $no = 1;
-        foreach ($alumni as $item) {
-            $sheet->fromArray([
-                $no++,
-                $item->nim,
-                $item->nama_alumni,
-                $item->prodi,
-                $item->no_hp,
-                $item->email,
-                $item->tahun_masuk,
-                $item->tgl_lulus,
-                $item->tanggal_kerja_pertama,
-                $item->tanggal_mulai_instansi,
-            ], null, 'A' . $row++);
-            
+            // Header
+            $header = ['Program Studi', 'NIM', 'Nama', 'Tanggal Lulus'];
+            $sheet->fromArray([$header], null, 'A1');
+            $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+            $sheet->getStyle('A1:D1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $row = 2;
+            foreach ($alumni as $item) {
+                $sheet->fromArray([
+                    $item->prodi,
+                    $item->nim,
+                    $item->nama_alumni,
+                    $item->tgl_lulus,
+                ], null, 'A' . $row);
+
+                $sheet->getStyle("A{$row}:D{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $row++;
+            }
+
+            foreach (range('A', 'D') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
         }
 
-        foreach (range('A', 'J') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-        
+        // ======================== JIKA SUDAH MENGISI ========================
+        else {
+            $alumni = Alumni::with('instansi')
+                ->whereNotNull('tanggal_kerja_pertama')
+                ->orderBy('prodi')
+                ->get();
 
-        $filename = 'Data Alumni ' . now()->format('Y-m-d H-i-s') . '.xlsx';
+            $header = [
+                'Program Studi', 'NIM', 'Nama', 'No.HP', 'Email',
+                'Tanggal Lulus', 'Tahun Masuk', 'Tanggal Pertama Kerja', 'Masa Tunggu',
+                'Tgl Mulai Kerja Instansi Saat Ini', 'Jenis Instansi', 'Nama Instansi',
+                'Skala', 'Lokasi Instansi', 'Kategori Profesi', 'Profesi'
+            ];
+
+            $sheet->fromArray([$header], null, 'A1');
+            $sheet->getStyle('A1:P1')->getFont()->setBold(true);
+            $sheet->getStyle('A1:P1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $row = 2;
+            foreach ($alumni as $item) {
+                $instansi = $item->instansi;
+
+                $masa_tunggu = null;
+                if ($item->tgl_lulus && $item->tanggal_kerja_pertama) {
+                    try {
+                        $masa_tunggu = \Carbon\Carbon::parse($item->tgl_lulus)->diffInDays(\Carbon\Carbon::parse($item->tanggal_kerja_pertama));
+                    } catch (\Exception $e) {
+                        $masa_tunggu = null;
+                    }
+                }
+
+                $sheet->fromArray([
+                    $item->prodi,
+                    $item->nim,
+                    $item->nama_alumni,
+                    $item->no_hp,
+                    $item->email,
+                    $item->tgl_lulus,
+                    $item->tahun_masuk,
+                    $item->tanggal_kerja_pertama,
+                    $masa_tunggu,
+                    $item->tanggal_mulai_instansi,
+                    $instansi->jenis_instansi ?? '',
+                    $instansi->nama_instansi ?? '',
+                    $instansi->skala_instansi ?? '',
+                    $instansi->lokasi_instansi ?? '',
+                    $item->kategori_profesi,
+                    $item->profesi,
+                ], null, 'A' . $row);
+
+                $sheet->getStyle("A{$row}:P{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $row++;
+            }
+
+            foreach (range('A', 'P') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+        }
+
+        // ======================== EXPORT ========================
+        $filename = 'Data Alumni ' . ucfirst($status) . ' Mengisi - ' . now()->format('Y-m-d H-i-s') . '.xlsx';
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
