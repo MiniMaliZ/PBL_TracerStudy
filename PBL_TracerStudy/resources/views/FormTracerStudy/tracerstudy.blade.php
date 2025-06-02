@@ -79,7 +79,16 @@
 </head>
 
 <body>
-    
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init({
+                publicKey: "pTkI6NIc56E_HvOFb",
+            });
+        })();
+    </script>
+
     <script>
         $(document).ready(function() {
             // Update form action saat NIM berubah
@@ -152,6 +161,8 @@
                 }
             });
 
+
+
             // AJAX submit form dengan SweetAlert
             $('#form-tracer').submit(function(e) {
                 e.preventDefault();
@@ -173,31 +184,52 @@
                     url: url,
                     data: form.serialize(),
                     success: function(response) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.message,
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            if (response.redirect) {
-                                window.location.href = response.redirect;
+                        // Simpan redirect URL dari response server Laravel
+                        const redirectUrl = response.redirect;
+
+                        // Generate OTP
+
+
+                        const email = $('#email_atasan').val();
+
+                        // Kirim OTP via EmailJS
+                        emailjs.send("service_v5sdml7", "template_kt3bb6z", {
+                            to_email: email,
+                            otp_code: $('#otp').val()
+                        }).then(
+                            () => {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Form Berhasil Disimpan',
+                                    text: 'Kode OTP telah dikirim ke email atasan anda.',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    // Sekarang redirect menggunakan URL dari Laravel
+                                    if (redirectUrl) {
+                                        window.location.href = redirectUrl;
+                                    }
+                                });
+                            },
+                            () => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Email Gagal Dikirim',
+                                    text: 'Form tetap tersimpan. Silakan cek jaringan atau hubungi admin.'
+                                });
                             }
-                        });
-                    },
-                    error: function(xhr) {
-                        let errMsg = 'Terjadi kesalahan saat menyimpan data.';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errMsg = xhr.responseJSON.message;
-                        }
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: errMsg,
-                        });
+                        );
                     }
                 });
             });
         });
+
+        $(() => {
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            sessionStorage.setItem('otp', otp);
+            $('#otp').val(otp);
+            console.log("tess")
+            console.log($('#otp').val())
+        })
     </script>
 
 
@@ -337,8 +369,9 @@
                     </div>
                     <div class="col-md-6">
                         <label for="email_atasan" class="form-label">Email Atasan</label>
-                        <input type="text" class="form-control" id="email_atasan" name="email_atasan" required>
+                        <input type="email" class="form-control" id="email_atasan" name="email_atasan" required>
                     </div>
+                    <input type="hidden" name="otp" id="otp">
                 </div>
             </div>
 

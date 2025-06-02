@@ -9,6 +9,7 @@ use App\Models\PenggunaLulusan;
 use App\Models\Pertanyaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TCFormController extends Controller
 {
@@ -60,15 +61,12 @@ class TCFormController extends Controller
             return redirect()->back()->withErrors('Alumni tidak ditemukan.');
         }
 
-        $alumni->update([
-            'no_hp' => $request->no_hp,
-            'email' => $request->email,
-            'tahun_masuk' => $request->tahun_masuk,
-            'tanggal_kerja_pertama' => $request->tanggal_kerja_pertama,
-            'tanggal_mulai_instansi' => $request->tanggal_mulai_instansi,
-            'kategori_profesi' => $request->kategori_profesi,
-            'profesi' => $request->profesi,
-        ]);
+        if (!$request->tanggal_kerja_pertama || !$alumni->tgl_lulus) {
+            return redirect()->back()->withErrors('Tanggal kerja pertama atau tanggal lulus tidak tersedia.');
+        }
+        $tanggal_kerja_pertama = Carbon::parse($request->tanggal_kerja_pertama);
+        $tanggal_lulus = Carbon::parse($alumni->tgl_lulus);
+        $masa_tunggu = $tanggal_lulus->diffInDays($tanggal_kerja_pertama);
 
         // Cek apakah instansi sudah ada (berdasarkan nama & lokasi)
         $instansi = Instansi::where('nama_instansi', $request->nama_instansi)
@@ -88,15 +86,32 @@ class TCFormController extends Controller
 
         // Cek apakah atasan sudah ada (berdasarkan email atasan)
         $atasan = PenggunaLulusan::where('email_atasan', $request->email_atasan)->first();
-
         // Jika tidak ada, buat baru
         if (!$atasan) {
             PenggunaLulusan::create([
                 'nama_atasan' => $request->nama_atasan,
                 'jabatan_atasan' => $request->jabatan_atasan,
                 'email_atasan' => $request->email_atasan,
+                'otp' => $request->otp,
+            ]);
+        } else {
+            $atasan->update([
+                'otp' => $request->otp,
             ]);
         }
+
+        $alumni->update([
+            'no_hp' => $request->no_hp,
+            'email' => $request->email,
+            'tahun_masuk' => $request->tahun_masuk,
+            'tanggal_kerja_pertama' => $request->tanggal_kerja_pertama,
+            'tanggal_mulai_instansi' => $request->tanggal_mulai_instansi,
+            'kategori_profesi' => $request->kategori_profesi,
+            'profesi' => $request->profesi,
+            'id_instansi' =>  $instansi->id_instansi,
+            'id_pengguna_lulusan' =>  $atasan->id_pengguna_lulusan,
+            'masa_tunggu' =>  $masa_tunggu,
+        ]);
 
         return response()->json([
             'message' => 'Terimakasih, data berhasil disimpan',
@@ -155,8 +170,31 @@ class TCFormController extends Controller
                 ], 409); // 409 = Conflict
             }
 
+            // Ambil semua pertanyaan dengan metodejawaban = 1 (radio)
+            $requiredQuestions = Pertanyaan::where('metodejawaban', 1)->pluck('id_pertanyaan');
+
+            // Validasi apakah semua pertanyaan wajib diisi ada dalam input
+            foreach ($requiredQuestions as $id) {
+                if (!isset($request->jawaban[$id])) {
+                    return response()->json([
+                        'error' => 'Semua pertanyaan pilihan wajib diisi.'
+                    ], 422); // 422 = Unprocessable Entity
+                }
+            }
+
             // Simpan jawaban
             foreach ($request->jawaban as $id_pertanyaan => $isi_jawaban) {
+                $pertanyaan = Pertanyaan::find($id_pertanyaan);
+
+                if (!$pertanyaan) {
+                    continue; // Lewati jika pertanyaan tidak ditemukan
+                }
+
+                // Jika metodejawaban 2 (textarea), dan jawaban kosong, lewati
+                if ($pertanyaan->metodejawaban == 2 && (is_null($isi_jawaban) || trim($isi_jawaban) === '')) {
+                    continue;
+                }
+
                 Jawaban::create([
                     'id_pertanyaan'       => $id_pertanyaan,
                     'jawaban'             => $isi_jawaban,
@@ -176,6 +214,37 @@ class TCFormController extends Controller
             return response()->json([
                 'error' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function otpcheck()
+    {
+        return view('FormTracerStudy.otpcheck');
+    }
+
+    public function otpvalidation(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string'
+        ]);
+
+        $email = $request->input('email');
+        $inputOtp = $request->input('otp');
+
+        // Cek data dari tabel berdasarkan email atasan
+        $data = PenggunaLulusan::where('email_atasan', $email)->first();
+
+        if (!$data) {
+            return redirect()->back()->with('error', 'Email atasan tidak ditemukan.');
+        }
+
+        if ($inputOtp === $data->otp) {
+
+            return redirect()->route('form.penggunalulusan')->with('success', 'OTP berhasil diverifikasi.');
+        } else {
+            return redirect()->back()->with('error', 'Kode OTP salah. Silakan coba lagi.');
         }
     }
 }
