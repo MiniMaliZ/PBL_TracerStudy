@@ -9,11 +9,11 @@
             </ol>
         </nav>
         <ul class="navbar-nav d-flex align-items-center justify-content-end">
-            <li class="nav-item d-flex align-items-center">
+            {{-- <li class="nav-item d-flex align-items-center">
                 <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                     <i class="material-symbols-rounded">account_circle</i>
                 </a>
-            </li>
+            </li> --}}
             <li>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

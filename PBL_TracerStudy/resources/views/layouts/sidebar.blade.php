@@ -4,9 +4,9 @@
     id="sidenav-main">
     <div class="sidenav-header">
         <a class="navbar-brand px-4 py-3 m-0" href="#">
-            <img src="{{ asset('material-dashboard-master/assets/img/logo-ct-dark.png') }}" class="navbar-brand-img"
-                width="26" height="26" alt="main_logo">
-            <span class="ms-1 text-sm text-dark">Creative Tim</span>
+            <img src="{{ asset('images/TRACER STUDY LOGO-black.png') }}" class="navbar-brand-img"
+                width="35" height="35" alt="main_logo">
+            <span class="ms-1 text-sm text-dark">Tracer Study</span>
         </a>
     </div>
     <hr class="horizontal dark mt-0 mb-2">
