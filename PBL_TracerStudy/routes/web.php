@@ -11,6 +11,8 @@ use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TCFormController;
 use App\Http\Controllers\InstansiController;
+use App\Http\Controllers\ForgotPwAdminController;
+
 
 
 /*
@@ -30,6 +32,11 @@ Route::get('/', function () {
 
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'postlogin'])->name('login.process');
+// Routes yang sudah disinkronkan dengan sistem yang ada
+Route::get('/admin/forgot-password', [ForgotPwAdminController::class, 'showLinkRequestForm'])->name('admin.password.request');
+Route::post('/admin/forgot-password', [ForgotPwAdminController::class, 'sendResetLinkEmail'])->name('admin.password.email');
+Route::get('/admin/reset-password/{token}', [ForgotPwAdminController::class, 'showResetForm'])->name('admin.password.reset');
+Route::post('/admin/reset-password', [ForgotPwAdminController::class, 'reset'])->name('admin.password.update');
 
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -41,11 +48,6 @@ Route::get('/', function () {
 
 // Route::get('register', [AuthController::class, 'register'])->name('register');
 // Route::post('register', [AuthController::class, 'postRegister']);
-
-// Route::get('forgot-password', [AuthController::class, 'forgotPassword'])->name('password.request');
-// Route::post('forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
-// Route::get('reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
-// Route::post('reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
 
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard-export_excel', [AdminDashboardController::class, 'export_excel']);
@@ -88,6 +90,11 @@ Route::post('/admin', [AdminController::class, 'store'])->name('admin.store');
 Route::get('/admin/{id}/edit', [AdminController::class, 'edit'])->name('admin.edit');
 Route::put('/admin/{id}', [AdminController::class, 'update'])->name('admin.update');
 Route::delete('/admin/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
+// Forgot Password Admin
+
+
+
+
 
 Route::prefix('tracerstudy')->group(function () {
     //landing page

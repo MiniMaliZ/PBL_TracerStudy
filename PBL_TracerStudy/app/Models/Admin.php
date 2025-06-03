@@ -4,34 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 
-class Admin extends Authenticatable
+class Admin extends Authenticatable implements CanResetPassword
 {
-    use HasFactory;
+    use HasFactory, Notifiable, CanResetPasswordTrait;
 
-    protected $table = 'admin'; // Nama tabel
-    protected $primaryKey = 'id_admin'; // Primary key
+    protected $table = 'admin';
+    protected $primaryKey = 'id_admin';
+    public $timestamps = false;
 
-    public $timestamps = false; // Nonaktifkan timestamps jika tidak ada kolom created_at dan updated_at
+    protected $fillable = ['username', 'email', 'password', 'nama'];
+    protected $hidden = ['password'];
 
-    protected $fillable = [
-        'username',
-        'password',
-        'nama',
-    ];
-
-
-    public function getAuthIdentifierName()
-    {
-        return 'username';
-    }
-
-    protected $hidden = [
-        'password', // Sembunyikan password saat serialisasi
-    ];
-
-
-    // Relasi ke tabel pertanyaan
     public function pertanyaan()
     {
         return $this->hasMany(Pertanyaan::class, 'created_by', 'id_admin');
