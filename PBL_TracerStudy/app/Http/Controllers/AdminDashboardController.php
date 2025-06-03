@@ -81,9 +81,9 @@ class AdminDashboardController extends Controller
             'profesiData',
             'instansiLabels',
             'instansiData',
-            'kriteriaChartData',
             'masaTunggu',
             'sebaranLingkup',
+            'kriteriaChartData',
         ));
     }
 
@@ -246,9 +246,88 @@ class AdminDashboardController extends Controller
                 'internasional' => $internasional,
                 'nasional' => $nasional,
                 'wirausaha' => $wirausaha,
-            ];
+            ];  
         }
 
         return $data;
     }
+        public function exportLingkupKerja()
+    {
+        $data = $this->getSebaranLingkupProfesiData();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header
+        $sheet->fromArray([[
+            'Tahun Lulus', 'Jumlah Lulusan', 'Jumlah Terlacak',
+            'Kesesuaian Infokom', 'Kesesuaian Non Infokom',
+            'Internasional', 'Nasional', 'Wirausaha'
+        ]], null, 'A1');
+
+        // Data rows
+        $rowIndex = 2;
+        foreach ($data as $row) {
+            $sheet->fromArray([
+                $row['tahun'],
+                $row['jumlah_lulusan'],
+                $row['terlacak'],
+                $row['infokom'],
+                $row['non_infokom'],
+                $row['internasional'],
+                $row['nasional'],
+                $row['wirausaha'],
+            ], null, 'A' . $rowIndex++);
+        }
+
+        foreach (range('A', 'H') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'Sebaran_Lingkup_Kerja_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
+    }
+        public function exportMasaTunggu()
+    {
+        $data = $this->getMasaTungguTableData();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header
+        $sheet->fromArray([[
+            'Tahun Lulus', 'Jumlah Lulusan', 'Jumlah Terlacak', 'Rata-rata Masa Tunggu (bulan)'
+        ]], null, 'A1');
+
+        // Data rows
+        $rowIndex = 2;
+        foreach ($data as $row) {
+            $sheet->fromArray([
+                $row['tahun_lulus'],
+                $row['jumlah_lulusan'],
+                $row['jumlah_terlacak'],
+                number_format($row['rata_rata_masa_tunggu'], 2)
+            ], null, 'A' . $rowIndex++);
+        }
+
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'Masa_Tunggu_Alumni_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
+    }
+
 }

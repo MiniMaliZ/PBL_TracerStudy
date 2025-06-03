@@ -38,7 +38,7 @@
                 <div>
                     <h5 class="mb-1">Tabel Sebaran Lingkup Tempat Kerja dan Kesesuaian Profesi</h5>
                     <p class="text-sm">Persentase hasil pelacakan alumni</p>
-                    <a href="{{ url('/dashboard-export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i>
+                    <a href="{{ url('/dashboard-lingkup_kerja') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i>
                         Export
                         Excel</a>
                 </div>
@@ -91,7 +91,7 @@
         <div class="card-body">
             <h5 class="mb-1">Tabel Rata-Rata Masa Tunggu</h5>
             <p class="text-sm">Berdasarkan hasil pelacakan alumni</p>
-            <a href="{{ url('/dashboard-export_excel') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i>
+            <a href="{{ url('/dashboard-masa_tunggu') }}" class="btn btn-primary"><i class="fa fa-file-excel"></i>
                 Export
                 Excel</a>
             <div class="table-responsive mt-3">
