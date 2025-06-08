@@ -37,10 +37,18 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="prodi">Program Studi</label>
-                            <input type="text" name="prodi" id="prodi" class="form-control"
-                                value="{{ $alumni->prodi }}"
-                                placeholder="Masukkan program studi, contoh: Teknik Informatika" required>
+                            <label for="id_prodi">Program Studi</label>
+                            <select name="id_prodi" id="id_prodi" class="form-control @error('id_prodi') is-invalid @enderror" required>
+                                <option value="">Pilih Program Studi</option>
+                                @foreach($prodis as $prodi)
+                                    <option value="{{ $prodi->id_prodi }}" {{ $alumni->id_prodi == $prodi->id_prodi ? 'selected' : '' }}>
+                                        {{ $prodi->nama_prodi }} ({{ $prodi->jurusan }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('id_prodi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
@@ -112,10 +120,19 @@
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="profesi">Profesi</label>
-                            <input type="text" name="profesi" id="profesi" class="form-control"
-                                value="{{ $alumni->profesi }}"
-                                placeholder="Masukkan profesi, contoh: Software Developer">
+                            <label for="id_profesi">Profesi</label>
+                            <select name="id_profesi" id="id_profesi" class="form-control">
+                                <option value="">Pilih Profesi</option>
+                                @foreach($profesis->groupBy('kategori_profesi') as $kategori => $profesiGroup)
+                                    <optgroup label="{{ $kategori }}">
+                                        @foreach($profesiGroup as $profesi)
+                                            <option value="{{ $profesi->id_profesi }}" {{ $alumni->id_profesi == $profesi->id_profesi ? 'selected' : '' }}>
+                                                {{ $profesi->nama_profesi }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -164,6 +181,7 @@
                         <div class="form-group">
                             <label for="jenis_instansi">Jenis Instansi</label>
                             <select name="jenis_instansi" id="jenis_instansi" class="form-control">
+                                <option value="">Pilih jenis instansi</option>
                                 <option value="Pendidikan Tinggi"
                                     {{ $alumni?->instansi?->jenis_instansi == 'Pendidikan Tinggi' ? 'selected' : '' }}>
                                     Pendidikan Tinggi</option>
@@ -182,6 +200,7 @@
                         <div class="form-group">
                             <label for="skala_instansi">Skala Instansi</label>
                             <select name="skala_instansi" id="skala_instansi" class="form-control">
+                                <option value="">Pilih skala instansi</option>
                                 <option value="Wirausaha"
                                     {{ $alumni?->instansi?->skala_instansi == 'Wirausaha' ? 'selected' : '' }}>Wirausaha
                                 </option>

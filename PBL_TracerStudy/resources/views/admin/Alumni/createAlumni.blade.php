@@ -30,21 +30,30 @@
                         <div class="form-group">
                             <label for="nama_alumni">Nama <span class="text-danger">*</span></label>
                             <input type="text" name="nama_alumni" id="nama_alumni" class="form-control"
-                                placeholder="Masukkan nama lengkap alumni" required>
+                                value="{{ old('nama_alumni') }}" placeholder="Masukkan nama lengkap alumni" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="prodi">Program Studi <span class="text-danger">*</span></label>
-                            <input type="text" name="prodi" id="prodi" class="form-control"
-                                placeholder="Masukkan program studi, contoh: Teknik Informatika" required>
+                            <label for="id_prodi">Program Studi <span class="text-danger">*</span></label>
+                            <select name="id_prodi" id="id_prodi" class="form-control @error('id_prodi') is-invalid @enderror" required>
+                                <option value="">Pilih Program Studi</option>
+                                @foreach($prodis as $prodi)
+                                    <option value="{{ $prodi->id_prodi }}" {{ old('id_prodi') == $prodi->id_prodi ? 'selected' : '' }}>
+                                        {{ $prodi->nama_prodi }} ({{ $prodi->jurusan }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('id_prodi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="tgl_lulus">Tanggal Lulus <span class="text-danger">*</span></label>
                             <input type="date" name="tgl_lulus" id="tgl_lulus" class="form-control"
-                                placeholder="Pilih tanggal lulus" required>
+                                value="{{ old('tgl_lulus') }}" placeholder="Pilih tanggal lulus" required>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -65,7 +74,7 @@
                         <div class="form-group">
                             <label for="email">Email <span class="text-muted">(Opsional)</span></label>
                             <input type="email" name="email" id="email" class="form-control"
-                                placeholder="Masukkan email, contoh: alumni@email.com">
+                                value="{{ old('email') }}" placeholder="Masukkan email, contoh: alumni@email.com">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -89,21 +98,31 @@
                         <div class="form-group">
                             <label for="tanggal_kerja_pertama">Tanggal Kerja Pertama</label>
                             <input type="date" name="tanggal_kerja_pertama" id="tanggal_kerja_pertama"
-                                class="form-control" placeholder="Pilih tanggal kerja pertama">
+                                class="form-control" value="{{ old('tanggal_kerja_pertama') }}" placeholder="Pilih tanggal kerja pertama">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="tanggal_mulai_instansi">Tanggal Mulai Instansi</label>
                             <input type="date" name="tanggal_mulai_instansi" id="tanggal_mulai_instansi"
-                                class="form-control" placeholder="Pilih tanggal mulai di instansi">
+                                class="form-control" value="{{ old('tanggal_mulai_instansi') }}" placeholder="Pilih tanggal mulai di instansi">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="profesi">Profesi</label>
-                            <input type="text" name="profesi" id="profesi" class="form-control"
-                                placeholder="Masukkan profesi, contoh: Software Developer">
+                            <label for="id_profesi">Profesi</label>
+                            <select name="id_profesi" id="id_profesi" class="form-control">
+                                <option value="">Pilih Profesi</option>
+                                @foreach($profesis->groupBy('kategori_profesi') as $kategori => $profesiGroup)
+                                    <optgroup label="{{ $kategori }}">
+                                        @foreach($profesiGroup as $profesi)
+                                            <option value="{{ $profesi->id_profesi }}" {{ old('id_profesi') == $profesi->id_profesi ? 'selected' : '' }}>
+                                                {{ $profesi->nama_profesi }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -114,21 +133,21 @@
                         <div class="form-group">
                             <label for="nama_atasan">Nama Atasan</label>
                             <input type="text" name="nama_atasan" id="nama_atasan" class="form-control"
-                                placeholder="Masukkan nama atasan langsung">
+                                value="{{ old('nama_atasan') }}" placeholder="Masukkan nama atasan langsung">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="jabatan_atasan">Jabatan Atasan</label>
                             <input type="text" name="jabatan_atasan" id="jabatan_atasan" class="form-control"
-                                placeholder="Masukkan jabatan atasan, contoh: Manager IT">
+                                value="{{ old('jabatan_atasan') }}" placeholder="Masukkan jabatan atasan, contoh: Manager IT">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="email_atasan">Email Atasan</label>
                             <input type="email" name="email_atasan" id="email_atasan" class="form-control"
-                                placeholder="Masukkan email atasan, contoh: manager@perusahaan.com">
+                                value="{{ old('email_atasan') }}" placeholder="Masukkan email atasan, contoh: manager@perusahaan.com">
                         </div>
                     </div>
                 </div>
@@ -139,7 +158,7 @@
                         <div class="form-group">
                             <label for="nama_instansi">Nama Instansi</label>
                             <input type="text" name="nama_instansi" id="nama_instansi" class="form-control"
-                                placeholder="Masukkan nama perusahaan/instansi">
+                                value="{{ old('nama_instansi') }}" placeholder="Masukkan nama perusahaan/instansi">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -176,7 +195,7 @@
                         <div class="form-group">
                             <label for="lokasi_instansi">Lokasi Instansi</label>
                             <input type="text" name="lokasi_instansi" id="lokasi_instansi" class="form-control"
-                                placeholder="Masukkan lokasi instansi, contoh: Jakarta Pusat">
+                                value="{{ old('lokasi_instansi') }}" placeholder="Masukkan lokasi instansi, contoh: Jakarta Pusat">
                         </div>
                     </div>
                     <div class="col-md-6">
