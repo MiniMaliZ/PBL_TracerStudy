@@ -14,6 +14,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Font;
+
 class AlumniController extends Controller
 {
     // Menampilkan data dalam tabel
@@ -35,44 +36,81 @@ class AlumniController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nim' => 'required|unique:alumni,nim',
-            'nama_alumni' => 'required|max:100',
-            'prodi' => 'required|max:100',
+            // Field wajib (required)
+            'nim' => 'required|unique:alumni,nim|numeric|digits_between:8,15',
+            'nama_alumni' => 'required|string|max:255',
+            'prodi' => 'required|string|max:255',
             'tgl_lulus' => 'required|date',
+
+            // Field opsional (nullable)
+            'tahun_masuk' => 'nullable|digits:4|integer|min:1900|max:' . (date('Y') + 1),
+            'email' => 'nullable|email|max:255',
+            'no_hp' => 'nullable|numeric|digits_between:10,15',
             'tanggal_kerja_pertama' => 'nullable|date',
-            'email' => 'nullable|email',
-            'email_atasan' => 'nullable|email',
-            'nama_instansi' => 'nullable|max:100',
+            'tanggal_mulai_instansi' => 'nullable|date',
+            'profesi' => 'nullable|string|max:255',
+            'nama_atasan' => 'nullable|string|max:255',
+            'jabatan_atasan' => 'nullable|string|max:255',
+            'email_atasan' => 'nullable|email|max:255',
+            'nama_instansi' => 'nullable|string|max:255',
             'jenis_instansi' => 'nullable|in:Pendidikan Tinggi,Instansi Pemerintah,BUMN,Perusahaan Swasta',
             'skala_instansi' => 'nullable|in:Wirausaha,Nasional,Multinasional',
+            'lokasi_instansi' => 'nullable|string|max:255',
+            'no_hp_instansi' => 'nullable|numeric|digits_between:10,15',
         ]);
 
-        // Cek atau buat data pengguna_lulusan
-        $penggunaLulusan = PenggunaLulusan::updateOrCreate(
-            ['email_atasan' => $request->email_atasan], // Cari berdasarkan email_atasan
-            [
-                'nama_atasan' => $request->nama_atasan,
-                'jabatan_atasan' => $request->jabatan_atasan,
-                'email_atasan' => $request->email_atasan,
-            ]
-        );
+        // Inisialisasi ID untuk relasi
+        $id_pengguna_lulusan = null;
+        $id_instansi = null;
 
-        // Cek atau buat data instansi
-        $instansi = Instansi::updateOrCreate(
-            ['nama_instansi' => $request->nama_instansi], // Cari berdasarkan nama_instansi
-            [
-                'jenis_instansi' => $request->jenis_instansi,
-                'skala_instansi' => $request->skala_instansi,
-                'lokasi_instansi' => $request->lokasi_instansi,
-                'no_hp_instansi' => $request->no_hp_instansi,
-            ]
-        );
+        // ===== HANDLE PENGGUNA LULUSAN =====
+        // Cek apakah ada minimal satu field yang diisi
+        $hasAtasanData = $request->filled('nama_atasan') ||
+            $request->filled('jabatan_atasan') ||
+            $request->filled('email_atasan');
+
+        if ($hasAtasanData) {
+            $penggunaLulusan = PenggunaLulusan::updateOrCreate(
+                ['email_atasan' => $request->email_atasan ?: 'temp_' . time()], // Fallback jika email kosong
+                [
+                    'nama_atasan' => $request->nama_atasan,
+                    'jabatan_atasan' => $request->jabatan_atasan,
+                    'email_atasan' => $request->email_atasan,
+                ]
+            );
+            $id_pengguna_lulusan = $penggunaLulusan->id_pengguna_lulusan;
+        }
+
+        // ===== HANDLE INSTANSI =====
+        // Cek apakah ada minimal satu field yang diisi
+        $hasInstansiData = $request->filled('nama_instansi') ||
+            $request->filled('jenis_instansi') ||
+            $request->filled('skala_instansi') ||
+            $request->filled('lokasi_instansi') ||
+            $request->filled('no_hp_instansi');
+
+        if ($hasInstansiData) {
+            // Jika nama_instansi kosong, buat nama unik untuk avoid duplicate
+            $namaInstansi = $request->nama_instansi ?: 'Unknown_' . time();
+
+            $instansi = Instansi::updateOrCreate(
+                ['nama_instansi' => $namaInstansi],
+                [
+                    'nama_instansi' => $request->nama_instansi,
+                    'jenis_instansi' => $request->jenis_instansi,
+                    'skala_instansi' => $request->skala_instansi,
+                    'lokasi_instansi' => $request->lokasi_instansi,
+                    'no_hp_instansi' => $request->no_hp_instansi,
+                ]
+            );
+            $id_instansi = $instansi->id_instansi;
+        }
 
         // Hitung masa tunggu (dalam bulan) berdasarkan tgl_lulus dan tanggal_kerja_pertama
         $masaTunggu = null;
         if ($request->tgl_lulus && $request->tanggal_kerja_pertama) {
             $masaTunggu = \Carbon\Carbon::parse($request->tgl_lulus)
-                ->diffInMonths(\Carbon\Carbon::parse($request->tanggal_kerja_pertama), false); // False untuk hasil negatif
+                ->diffInMonths(\Carbon\Carbon::parse($request->tanggal_kerja_pertama), false);
         }
 
         // Simpan data alumni
@@ -89,8 +127,8 @@ class AlumniController extends Controller
             'masa_tunggu' => $masaTunggu,
             'kategori_profesi' => $request->kategori_profesi,
             'profesi' => $request->profesi,
-            'id_pengguna_lulusan' => $penggunaLulusan->id_pengguna_lulusan,
-            'id_instansi' => $instansi->id_instansi,
+            'id_pengguna_lulusan' => $id_pengguna_lulusan,
+            'id_instansi' => $id_instansi,
         ]);
 
         return redirect()->route('alumni.index')->with('success', 'Data alumni berhasil ditambahkan.');
@@ -112,42 +150,77 @@ class AlumniController extends Controller
             'nama_alumni' => 'required|max:100',
             'prodi' => 'required|max:100',
             'tgl_lulus' => 'required|date',
+            'tahun_masuk' => 'nullable|digits:4|integer|min:1900|max:' . (date('Y') + 1),
             'tanggal_kerja_pertama' => 'nullable|date',
+            'tanggal_mulai_instansi' => 'nullable|date',
             'email' => 'nullable|email',
+            'no_hp' => 'nullable|numeric|digits_between:10,15',
+            'profesi' => 'nullable|string|max:255',
+            'nama_atasan' => 'nullable|string|max:255',
+            'jabatan_atasan' => 'nullable|string|max:255',
             'email_atasan' => 'nullable|email',
             'nama_instansi' => 'nullable|max:100',
             'jenis_instansi' => 'nullable|in:Pendidikan Tinggi,Instansi Pemerintah,BUMN,Perusahaan Swasta',
             'skala_instansi' => 'nullable|in:Wirausaha,Nasional,Multinasional',
+            'lokasi_instansi' => 'nullable|string|max:255',
+            'no_hp_instansi' => 'nullable|numeric|digits_between:10,15',
         ]);
 
         $alumni = Alumni::findOrFail($nim);
 
-        // Cek atau buat data pengguna_lulusan
-        $penggunaLulusan = PenggunaLulusan::updateOrCreate(
-            ['email_atasan' => $request->email_atasan], // Cari berdasarkan email_atasan
-            [
-                'nama_atasan' => $request->nama_atasan,
-                'jabatan_atasan' => $request->jabatan_atasan,
-                'email_atasan' => $request->email_atasan,
-            ]
-        );
+        // Inisialisasi ID untuk relasi
+        $id_pengguna_lulusan = $alumni->id_pengguna_lulusan;
+        $id_instansi = $alumni->id_instansi;
 
-        // Cek atau buat data instansi
-        $instansi = Instansi::updateOrCreate(
-            ['nama_instansi' => $request->nama_instansi], // Cari berdasarkan nama_instansi
-            [
-                'jenis_instansi' => $request->jenis_instansi,
-                'skala_instansi' => $request->skala_instansi,
-                'lokasi_instansi' => $request->lokasi_instansi,
-                'no_hp_instansi' => $request->no_hp_instansi,
-            ]
-        );
+        // ===== HANDLE PENGGUNA LULUSAN =====
+        $hasAtasanData = $request->filled('nama_atasan') ||
+            $request->filled('jabatan_atasan') ||
+            $request->filled('email_atasan');
+
+        if ($hasAtasanData) {
+            $penggunaLulusan = PenggunaLulusan::updateOrCreate(
+                ['email_atasan' => $request->email_atasan ?: 'temp_' . time()],
+                [
+                    'nama_atasan' => $request->nama_atasan,
+                    'jabatan_atasan' => $request->jabatan_atasan,
+                    'email_atasan' => $request->email_atasan,
+                ]
+            );
+            $id_pengguna_lulusan = $penggunaLulusan->id_pengguna_lulusan;
+        } elseif ($request->input('nama_atasan') === '' && $request->input('jabatan_atasan') === '' && $request->input('email_atasan') === '') {
+            $id_pengguna_lulusan = null;
+        }
+
+        // ===== HANDLE INSTANSI =====
+        $hasInstansiData = $request->filled('nama_instansi') ||
+            $request->filled('jenis_instansi') ||
+            $request->filled('skala_instansi') ||
+            $request->filled('lokasi_instansi') ||
+            $request->filled('no_hp_instansi');
+
+        if ($hasInstansiData) {
+            $namaInstansi = $request->nama_instansi ?: 'Unknown_' . time();
+
+            $instansi = Instansi::updateOrCreate(
+                ['nama_instansi' => $namaInstansi],
+                [
+                    'nama_instansi' => $request->nama_instansi,
+                    'jenis_instansi' => $request->jenis_instansi,
+                    'skala_instansi' => $request->skala_instansi,
+                    'lokasi_instansi' => $request->lokasi_instansi,
+                    'no_hp_instansi' => $request->no_hp_instansi,
+                ]
+            );
+            $id_instansi = $instansi->id_instansi;
+        } elseif ($request->input('nama_instansi') === '' && $request->input('jenis_instansi') === '' && $request->input('skala_instansi') === '' && $request->input('lokasi_instansi') === '' && $request->input('no_hp_instansi') === '') {
+            $id_instansi = null;
+        }
 
         // Hitung masa tunggu (dalam bulan) berdasarkan tgl_lulus dan tanggal_kerja_pertama
         $masaTunggu = null;
         if ($request->tgl_lulus && $request->tanggal_kerja_pertama) {
             $masaTunggu = \Carbon\Carbon::parse($request->tgl_lulus)
-                ->diffInMonths(\Carbon\Carbon::parse($request->tanggal_kerja_pertama), false); // False untuk hasil negatif
+                ->diffInMonths(\Carbon\Carbon::parse($request->tanggal_kerja_pertama), false);
         }
 
         // Update data alumni
@@ -163,8 +236,8 @@ class AlumniController extends Controller
             'masa_tunggu' => $masaTunggu,
             'kategori_profesi' => $request->kategori_profesi,
             'profesi' => $request->profesi,
-            'id_pengguna_lulusan' => $penggunaLulusan->id_pengguna_lulusan,
-            'id_instansi' => $instansi->id_instansi,
+            'id_pengguna_lulusan' => $id_pengguna_lulusan,
+            'id_instansi' => $id_instansi,
         ]);
 
         return redirect()->route('alumni.index')->with('success', 'Data alumni berhasil diperbarui.');
@@ -183,45 +256,45 @@ class AlumniController extends Controller
         return view('admin.Alumni.indexAlumni');
     }
 
-public function import_ajax(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'file_alumni' => ['required', 'file', 'mimes:xlsx', 'max:1024']
-    ]);
+    public function import_ajax(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file_alumni' => ['required', 'file', 'mimes:xlsx', 'max:1024']
+        ]);
 
-    if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $file = $request->file('file_alumni');
+        $reader = IOFactory::createReader('Xlsx');
+        $spreadsheet = $reader->load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray(null, true, true, true);
+
+        $insert = [];
+        foreach ($data as $i => $row) {
+            if ($i == 1) continue; // skip header
+
+            $tgl_lulus = $this->convertExcelDate($row['D'] ?? null);
+
+            $insert[] = [
+                'nim' => $row['A'],
+                'nama_alumni' => $row['B'],
+                'prodi' => $row['C'],
+                'tgl_lulus' => $tgl_lulus,
+            ];
+        }
+
+        if (!empty($insert)) {
+            Alumni::insertOrIgnore($insert);
+            return redirect()->back()->with('success', 'Data berhasil diimpor.');
+        }
+
+        return redirect()->back()->with('error', 'Tidak ada data yang diimpor.');
     }
-
-    $file = $request->file('file_alumni');
-    $reader = IOFactory::createReader('Xlsx');
-    $spreadsheet = $reader->load($file->getRealPath());
-    $sheet = $spreadsheet->getActiveSheet();
-    $data = $sheet->toArray(null, true, true, true);
-
-    $insert = [];
-    foreach ($data as $i => $row) {
-        if ($i == 1) continue; // skip header
-
-        $tgl_lulus = $this->convertExcelDate($row['D'] ?? null);
-
-        $insert[] = [
-            'nim' => $row['A'],
-            'nama_alumni' => $row['B'],
-            'prodi' => $row['C'],
-            'tgl_lulus' => $tgl_lulus,
-        ];
-    }
-
-    if (!empty($insert)) {
-        Alumni::insertOrIgnore($insert);
-        return redirect()->back()->with('success', 'Data berhasil diimpor.');
-    }
-
-    return redirect()->back()->with('error', 'Tidak ada data yang diimpor.');
-}
 
 
     // Tambahkan fungsi bantu ini dalam controller
@@ -240,7 +313,7 @@ public function import_ajax(Request $request)
         }
     }
 
-        public function export_excel(Request $request)
+    public function export_excel(Request $request)
     {
         $status = $request->status;
 
@@ -287,10 +360,22 @@ public function import_ajax(Request $request)
                 ->get();
 
             $header = [
-                'Program Studi', 'NIM', 'Nama', 'No.HP', 'Email',
-                'Tanggal Lulus', 'Tahun Masuk', 'Tanggal Pertama Kerja', 'Masa Tunggu',
-                'Tgl Mulai Kerja Instansi Saat Ini', 'Jenis Instansi', 'Nama Instansi',
-                'Skala', 'Lokasi Instansi', 'Kategori Profesi', 'Profesi'
+                'Program Studi',
+                'NIM',
+                'Nama',
+                'No.HP',
+                'Email',
+                'Tanggal Lulus',
+                'Tahun Masuk',
+                'Tanggal Pertama Kerja',
+                'Masa Tunggu',
+                'Tgl Mulai Kerja Instansi Saat Ini',
+                'Jenis Instansi',
+                'Nama Instansi',
+                'Skala',
+                'Lokasi Instansi',
+                'Kategori Profesi',
+                'Profesi'
             ];
 
             $sheet->fromArray([$header], null, 'A1');
