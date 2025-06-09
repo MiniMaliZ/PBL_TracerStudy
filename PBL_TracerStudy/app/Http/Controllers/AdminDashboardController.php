@@ -15,11 +15,12 @@ class AdminDashboardController extends Controller
     {
         // PROFESI
         $profesi = DB::table('alumni')
-            ->select('profesi', DB::raw('count(*) as total'))
-            ->whereNotNull('profesi') // Filter untuk menghapus data null
-            ->groupBy('profesi')
-            ->orderByDesc('total')
-            ->get();
+        ->join('profesi', 'alumni.id_profesi', '=', 'profesi.id_profesi')
+        ->select('profesi.nama_profesi as profesi', DB::raw('count(*) as total'))
+        ->whereNotNull('alumni.id_profesi')
+        ->groupBy('profesi.nama_profesi')
+        ->orderByDesc('total')
+        ->get();
 
         $topProfesi = $profesi->take(10);
         $sisa = $profesi->skip(10)->sum('total');
@@ -32,23 +33,25 @@ class AdminDashboardController extends Controller
         }
 
         // INSTANSI
-        $instansi = DB::table('instansi')
-            ->select('jenis_instansi', DB::raw('count(*) as total'))
-            ->groupBy('jenis_instansi')
-            ->get();
+            $instansi = DB::table('alumni')
+        ->join('instansi', 'alumni.id_instansi', '=', 'instansi.id_instansi')
+        ->select('instansi.jenis_instansi', DB::raw('count(*) as total'))
+        ->groupBy('instansi.jenis_instansi')
+        ->get();
+
 
         $instansiLabels = $instansi->pluck('jenis_instansi')->toArray();
         $instansiData = $instansi->pluck('total')->toArray();
 
         // Kriteria Pertanyaan
         $kriteria = [
-            1 => 'Kerjasama Tim',
-            2 => 'Keahlian di bidang TI',
-            3 => 'Kemampuan berbahasa asing (Inggris)',
-            4 => 'Kemampuan berkomunikasi',
-            5 => 'Pengembangan diri',
-            6 => 'Kepemimpinan',
-            7 => 'Etos Kerja',
+            4 => 'Kerjasama Tim',
+            5 => 'Keahlian di bidang TI',
+            6 => 'Kemampuan berbahasa asing (Inggris)',
+            7 => 'Kemampuan berkomunikasi',
+            8 => 'Pengembangan diri',
+            9 => 'Kepemimpinan',
+            10 => 'Etos Kerja',
         ];
 
         $kriteriaChartData = [];
@@ -99,7 +102,7 @@ class AdminDashboardController extends Controller
         foreach ($tahunLulus as $tahun) {
             $alumniTahun = Alumni::whereYear('tgl_lulus', $tahun);
             $jumlahLulusan = $alumniTahun->count();
-            $jumlahTerlacak = (clone $alumniTahun)->whereNotNull('profesi')->count();
+            $jumlahTerlacak = (clone $alumniTahun)->whereNotNull('id_profesi')->count();
             $pengisiMasaTunggu = (clone $alumniTahun)->whereNotNull('tanggal_kerja_pertama')->count();
             $totalMasaTunggu = (clone $alumniTahun)->whereNotNull('tanggal_kerja_pertama')->sum('masa_tunggu');
             $rataRataMasaTunggu = $pengisiMasaTunggu > 0 ? $totalMasaTunggu / $pengisiMasaTunggu : 0;
@@ -124,34 +127,34 @@ class AdminDashboardController extends Controller
 
         // Header
         $sheet->fromArray([
-            ['No', 'Jenis Kemampuan', 'Sangat Baik (%)', 'Baik (%)', 'Cukup (%)', 'Kurang (%)', 'Sangat Kurang (%)']
+            ['No', 'Jenis Kemampuan', 'Sangat Kurang (%)', 'Kurang (%)', 'Cukup (%)', 'Baik (%)', 'Sangat Baik (%)']
         ], null, 'A1');
 
         // Mapping ID Pertanyaan ke Nama Kemampuan
         $kriteria = [
-            1 => 'Kerjasama Tim',
-            2 => 'Keahlian di bidang TI',
-            3 => 'Kemampuan berbahasa asing (Inggris)',
-            4 => 'Kemampuan berkomunikasi',
-            5 => 'Pengembangan diri',
-            6 => 'Kepemimpinan',
-            7 => 'Etos Kerja',
+            4 => 'Kerjasama Tim',
+            5 => 'Keahlian di bidang TI',
+            6 => 'Kemampuan berbahasa asing (Inggris)',
+            7 => 'Kemampuan berkomunikasi',
+            8 => 'Pengembangan diri',
+            9 => 'Kepemimpinan',
+            10 => 'Etos Kerja',
         ];
 
         $kategoriLabel = [
-            5 => 'Sangat Baik',
-            4 => 'Baik',
-            3 => 'Cukup',
-            2 => 'Kurang',
             1 => 'Sangat Kurang',
+            2 => 'Kurang',
+            3 => 'Cukup',
+            4 => 'Baik',
+            5 => 'Sangat Baik',
         ];
 
         $rataRata = [
-            'Sangat Baik' => 0,
-            'Baik' => 0,
-            'Cukup' => 0,
-            'Kurang' => 0,
             'Sangat Kurang' => 0,
+            'Kurang' => 0,
+            'Cukup' => 0,
+            'Baik' => 0,
+            'Sangat Baik' => 0,
         ];
 
         $row = 2;
@@ -172,20 +175,21 @@ class AdminDashboardController extends Controller
                     ->count();
 
                 $persen = $total > 0 ? round(($jumlah / $total) * 100, 2) : 0;
-                $persentase[] = $persen;
+                $persentase[$label] = $persen;
 
                 // Tambahkan ke total rata-rata
                 $rataRata[$label] += $persen;
             }
 
+            // Isi baris data ke sheet
             $sheet->fromArray([
                 $no++,
                 $namaKemampuan,
-                $persentase[0], // Sangat Baik
-                $persentase[1], // Baik
-                $persentase[2], // Cukup
-                $persentase[3], // Kurang
-                $persentase[4], // Sangat Kurang
+                $persentase['Sangat Kurang'],
+                $persentase['Kurang'],
+                $persentase['Cukup'],
+                $persentase['Baik'],
+                $persentase['Sangat Baik'],
             ], null, 'A' . $row++);
         }
 
@@ -193,11 +197,11 @@ class AdminDashboardController extends Controller
         $sheet->fromArray([
             '',
             'Jumlah Rata-Rata',
-            round($rataRata['Sangat Baik'] / $jumlahKemampuan, 2),
-            round($rataRata['Baik'] / $jumlahKemampuan, 2),
-            round($rataRata['Cukup'] / $jumlahKemampuan, 2),
-            round($rataRata['Kurang'] / $jumlahKemampuan, 2),
             round($rataRata['Sangat Kurang'] / $jumlahKemampuan, 2),
+            round($rataRata['Kurang'] / $jumlahKemampuan, 2),
+            round($rataRata['Cukup'] / $jumlahKemampuan, 2),
+            round($rataRata['Baik'] / $jumlahKemampuan, 2),
+            round($rataRata['Sangat Baik'] / $jumlahKemampuan, 2),
         ], null, 'A' . $row);
 
         // Auto size kolom
@@ -216,7 +220,8 @@ class AdminDashboardController extends Controller
         exit;
     }
 
-    protected function getSebaranLingkupProfesiData()
+
+    function getSebaranLingkupProfesiData()
     {
         $tahunLulus = Alumni::selectRaw('YEAR(tgl_lulus) as tahun')
             ->whereNotNull('tgl_lulus')
@@ -226,30 +231,38 @@ class AdminDashboardController extends Controller
 
         $data = [];
 
-        foreach ($tahunLulus as $tahun) {
-            $alumniTahun = Alumni::with('instansi')->whereYear('tgl_lulus', $tahun);
+            foreach ($tahunLulus as $tahun) {
+        $alumniTahun = Alumni::with('instansi')->whereYear('tgl_lulus', $tahun);
 
-            $jumlahLulusan = $alumniTahun->count();
-            $terlacak = (clone $alumniTahun)->whereNotNull('profesi')->count();
-            $bidangInfokom = (clone $alumniTahun)->where('kategori_profesi', 'Infokom')->count();
-            $bidangNonInfokom = (clone $alumniTahun)->where('kategori_profesi', 'Non Infokom')->count();
-            $internasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Internasional'))->count();
-            $nasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Nasional'))->count();
-            $wirausaha = (clone $alumniTahun)->where('kategori_profesi', 'Wirausaha')->count();
+        $jumlahLulusan = $alumniTahun->count();
+        $terlacak = (clone $alumniTahun)->whereNotNull('id_profesi')->count();
 
-            $data[] = [
-                'tahun' => $tahun,
-                'jumlah_lulusan' => $jumlahLulusan,
-                'terlacak' => $terlacak,
-                'infokom' => $bidangInfokom,
-                'non_infokom' => $bidangNonInfokom,
-                'internasional' => $internasional,
-                'nasional' => $nasional,
-                'wirausaha' => $wirausaha,
-            ];  
-        }
+        // JOIN ke tabel profesi karena kategori_profesi ada di tabel tersebut
+        $alumniJoinProfesi = DB::table('alumni')
+            ->join('profesi', 'alumni.id_profesi', '=', 'profesi.id_profesi')
+            ->whereYear('tgl_lulus', $tahun);
 
-        return $data;
+        $bidangInfokom = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Infokom')->count();
+        $bidangNonInfokom = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Non Infokom')->count();
+        $wirausaha = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Wirausaha')->count();
+
+        $internasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Internasional'))->count();
+        $nasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Nasional'))->count();
+
+        $data[] = [
+            'tahun' => $tahun,
+            'jumlah_lulusan' => $jumlahLulusan,
+            'terlacak' => $terlacak,
+            'infokom' => $bidangInfokom,
+            'non_infokom' => $bidangNonInfokom,
+            'internasional' => $internasional,
+            'nasional' => $nasional,
+            'wirausaha' => $wirausaha,
+        ];
+    }
+
+
+            return $data;
     }
         public function exportLingkupKerja()
     {

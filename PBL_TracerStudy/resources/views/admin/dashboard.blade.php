@@ -163,53 +163,53 @@
                                 <tr class="text-center">
                                     <th>No</th>
                                     <th>Jenis Kemampuan</th>
-                                    <th>Sangat Baik (%)</th>
-                                    <th>Baik (%)</th>
-                                    <th>Cukup (%)</th>
-                                    <th>Kurang (%)</th>
                                     <th>Sangat Kurang (%)</th>
+                                    <th>Kurang (%)</th>
+                                    <th>Cukup (%)</th>
+                                    <th>Baik (%)</th>
+                                    <th>Sangat Baik (%)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @php
-                                    $totalSB = $totalB = $totalC = $totalK = $totalSK = 0;
+                                    $totalSK = $totalK = $totalC = $totalB = $totalSB = 0;
                                 @endphp
                                 @foreach ($kriteriaChartData as $index => $item)
                                     @php
                                         $data = $item['data'];
                                         $total = array_sum($data);
 
-                                        $sb = $total ? ($data['Sangat Baik'] / $total) * 100 : 0;
-                                        $b = $total ? ($data['Baik'] / $total) * 100 : 0;
-                                        $c = $total ? ($data['Cukup'] / $total) * 100 : 0;
-                                        $k = $total ? ($data['Kurang'] / $total) * 100 : 0;
                                         $sk = $total ? ($data['Sangat Kurang'] / $total) * 100 : 0;
+                                        $k = $total ? ($data['Kurang'] / $total) * 100 : 0;
+                                        $c = $total ? ($data['Cukup'] / $total) * 100 : 0;
+                                        $b = $total ? ($data['Baik'] / $total) * 100 : 0;
+                                        $sb = $total ? ($data['Sangat Baik'] / $total) * 100 : 0;
 
-                                        $totalSB += $sb;
-                                        $totalB += $b;
-                                        $totalC += $c;
-                                        $totalK += $k;
                                         $totalSK += $sk;
+                                        $totalK += $k;
+                                        $totalC += $c;
+                                        $totalB += $b;
+                                        $totalSB += $sb;
                                     @endphp
                                     <tr>
                                         <td class="text-center">{{ $loop->iteration }}</td>
                                         <td>{{ $item['label'] }}</td>
-                                        <td class="text-center">{{ number_format($sb, 2) }}</td>
-                                        <td class="text-center">{{ number_format($b, 2) }}</td>
-                                        <td class="text-center">{{ number_format($c, 2) }}</td>
-                                        <td class="text-center">{{ number_format($k, 2) }}</td>
                                         <td class="text-center">{{ number_format($sk, 2) }}</td>
+                                        <td class="text-center">{{ number_format($k, 2) }}</td>
+                                        <td class="text-center">{{ number_format($c, 2) }}</td>
+                                        <td class="text-center">{{ number_format($b, 2) }}</td>
+                                        <td class="text-center">{{ number_format($sb, 2) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
                                 <tr class="text-center fw-bold">
                                     <td colspan="2">Jumlah Rata-Rata</td>
-                                    <td>{{ number_format($totalSB / count($kriteriaChartData), 2) }}</td>
-                                    <td>{{ number_format($totalB / count($kriteriaChartData), 2) }}</td>
-                                    <td>{{ number_format($totalC / count($kriteriaChartData), 2) }}</td>
-                                    <td>{{ number_format($totalK / count($kriteriaChartData), 2) }}</td>
                                     <td>{{ number_format($totalSK / count($kriteriaChartData), 2) }}</td>
+                                    <td>{{ number_format($totalK / count($kriteriaChartData), 2) }}</td>
+                                    <td>{{ number_format($totalC / count($kriteriaChartData), 2) }}</td>
+                                    <td>{{ number_format($totalB / count($kriteriaChartData), 2) }}</td>
+                                    <td>{{ number_format($totalSB / count($kriteriaChartData), 2) }}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -304,7 +304,7 @@
                     labels: labels,
                     datasets: [{
                         label: kriteriaChartData[id].label,
-                        backgroundColor: ["#4CAF50", "#FFC107", "#FF9800", "#F44336", "#9E9E9E"],
+                        backgroundColor: ["#9E9E9E", "#F44336", "#FF9800", "#FFC107","#4CAF50"],
                         data: values
                     }]
                 },
