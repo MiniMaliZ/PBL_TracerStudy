@@ -127,29 +127,44 @@
                     </div>
                 </div>
 
-                <h5 class="mt-4 mb-3">Detail Pengguna Lulusan <span class="text-muted">(Opsional - dapat diisi kemudian)</span></h5>
+                <h5 class="mt-4 mb-3">Detail Pengguna Lulusan <span class="text-muted">(Opsional - Jika diisi salah satu, harus diisi semua)</span></h5>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="nama_atasan">Nama Atasan</label>
-                            <input type="text" name="nama_atasan" id="nama_atasan" class="form-control"
+                            <label for="nama_atasan">Nama Atasan <span class="conditional-required" style="display: none; color: red;">*</span></label>
+                            <input type="text" name="nama_atasan" id="nama_atasan" class="form-control atasan-field @error('nama_atasan') is-invalid @enderror"
                                 value="{{ old('nama_atasan') }}" placeholder="Masukkan nama atasan langsung">
+                            @error('nama_atasan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="jabatan_atasan">Jabatan Atasan</label>
-                            <input type="text" name="jabatan_atasan" id="jabatan_atasan" class="form-control"
+                            <label for="jabatan_atasan">Jabatan Atasan <span class="conditional-required" style="display: none; color: red;">*</span></label>
+                            <input type="text" name="jabatan_atasan" id="jabatan_atasan" class="form-control atasan-field @error('jabatan_atasan') is-invalid @enderror"
                                 value="{{ old('jabatan_atasan') }}" placeholder="Masukkan jabatan atasan, contoh: Manager IT">
+                            @error('jabatan_atasan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="email_atasan">Email Atasan</label>
-                            <input type="email" name="email_atasan" id="email_atasan" class="form-control"
+                            <label for="email_atasan">Email Atasan <span class="conditional-required" style="display: none; color: red;">*</span></label>
+                            <input type="email" name="email_atasan" id="email_atasan" class="form-control atasan-field @error('email_atasan') is-invalid @enderror"
                                 value="{{ old('email_atasan') }}" placeholder="Masukkan email atasan, contoh: manager@perusahaan.com">
+                            @error('email_atasan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
+                </div>
+
+                {{-- Alert untuk informasi validasi --}}
+                <div class="alert alert-warning atasan-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Perhatian:</strong> Jika Anda mengisi salah satu field atasan, maka semua field atasan (Nama, Jabatan, dan Email) harus diisi lengkap.
                 </div>
 
                 <h5 class="mt-4 mb-3">Detail Instansi <span class="text-muted">(Opsional - dapat diisi kemudian)</span></h5>
@@ -215,8 +230,12 @@
 
                 <div class="alert alert-info mt-3">
                     <i class="fas fa-info-circle"></i>
-                    <strong>Informasi:</strong> Field dengan tanda <span class="text-danger">*</span> wajib diisi. 
-                    Field lainnya dapat diisi sekarang atau kemudian melalui menu Edit Alumni.
+                    <strong>Informasi:</strong> 
+                    <ul class="mb-0 mt-2">
+                        <li>Field dengan tanda <span class="text-danger">*</span> wajib diisi.</li>
+                        <li>Field lainnya dapat diisi sekarang atau kemudian melalui menu Edit Alumni.</li>
+                        <li><strong>Khusus Detail Pengguna Lulusan:</strong> Jika diisi salah satu field, maka semua field harus diisi lengkap.</li>
+                    </ul>
                 </div>
 
                 <button type="submit" class="btn btn-success mt-3">Simpan</button>
@@ -224,4 +243,86 @@
             </form>
         </div>
     </div>
+
+    {{-- JavaScript untuk validasi conditional --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const atasanFields = document.querySelectorAll('.atasan-field');
+            const conditionalRequired = document.querySelectorAll('.conditional-required');
+            const atasanWarning = document.querySelector('.atasan-warning');
+
+            function checkAtasanFields() {
+                let hasValue = false;
+                
+                // Cek apakah ada field yang terisi
+                atasanFields.forEach(field => {
+                    if (field.value.trim() !== '') {
+                        hasValue = true;
+                    }
+                });
+
+                // Show/hide required indicator dan warning
+                conditionalRequired.forEach(indicator => {
+                    indicator.style.display = hasValue ? 'inline' : 'none';
+                });
+
+                if (atasanWarning) {
+                    atasanWarning.style.display = hasValue ? 'block' : 'none';
+                }
+
+                // Add/remove required attribute
+                atasanFields.forEach(field => {
+                    if (hasValue) {
+                        field.setAttribute('required', 'required');
+                        field.classList.add('required-conditional');
+                    } else {
+                        field.removeAttribute('required');
+                        field.classList.remove('required-conditional');
+                    }
+                });
+            }
+
+            // Event listeners untuk semua field atasan
+            atasanFields.forEach(field => {
+                field.addEventListener('input', checkAtasanFields);
+                field.addEventListener('blur', checkAtasanFields);
+            });
+
+            // Initial check
+            checkAtasanFields();
+
+            // Form validation sebelum submit
+            document.querySelector('form').addEventListener('submit', function(e) {
+                let hasAnyAtasanValue = false;
+                let allAtasanFilled = true;
+
+                atasanFields.forEach(field => {
+                    if (field.value.trim() !== '') {
+                        hasAnyAtasanValue = true;
+                    } else if (hasAnyAtasanValue || document.querySelector('.atasan-field').value.trim() !== '') {
+                        allAtasanFilled = false;
+                    }
+                });
+
+                // Check if any atasan field is filled but not all
+                const filledFields = Array.from(atasanFields).filter(field => field.value.trim() !== '');
+                if (filledFields.length > 0 && filledFields.length < atasanFields.length) {
+                    e.preventDefault();
+                    alert('Jika mengisi data atasan, semua field atasan (Nama, Jabatan, dan Email) harus diisi lengkap.');
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    {{-- CSS untuk styling conditional required --}}
+    <style>
+        .required-conditional {
+            border-left: 3px solid #ffc107 !important;
+        }
+        
+        .atasan-warning {
+            border-left: 4px solid #ffc107;
+        }
+    </style>
 @endsection
