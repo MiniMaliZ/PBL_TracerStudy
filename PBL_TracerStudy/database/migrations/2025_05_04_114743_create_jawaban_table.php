@@ -9,14 +9,13 @@ return new class extends Migration {
     {
         Schema::create('jawaban', function (Blueprint $table) {
             $table->id('id_jawaban');
-            $table->unsignedBigInteger('id_survei')->nullable();
             $table->unsignedBigInteger('id_pertanyaan');
             $table->string('nim_alumni', 20)->nullable(); // jika diisi alumni
             $table->unsignedBigInteger('id_pengguna_lulusan')->nullable(); // jika diisi pengguna lulusan
             $table->text('jawaban');
             $table->timestamp('answered_at')->useCurrent();
 
-            $table->foreign('id_survei')->references('id_survei')->on('survei')->nullOnDelete();
+            // Foreign Key Constraints
             $table->foreign('id_pertanyaan')->references('id_pertanyaan')->on('pertanyaan');
             $table->foreign('nim_alumni')->references('nim')->on('alumni')->nullOnDelete();
             $table->foreign('id_pengguna_lulusan')->references('id_pengguna_lulusan')->on('pengguna_lulusan')->nullOnDelete();

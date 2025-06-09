@@ -14,10 +14,10 @@ class Alumni extends Model
     public $incrementing = false; // Karena primary key bukan auto-increment
     public $timestamps = false; // Nonaktifkan timestamps
 
-    protected $fillable = [ 
+    protected $fillable = [
         'nim',
         'nama_alumni',
-        'prodi',
+        'id_prodi',  // Ganti dari 'prodi'
         'no_hp',
         'email',
         'tahun_masuk',
@@ -25,10 +25,9 @@ class Alumni extends Model
         'tanggal_kerja_pertama',
         'tanggal_mulai_instansi',
         'masa_tunggu',
-        'kategori_profesi',
-        'profesi',
-        'id_pengguna_lulusan', // Foreign key ke tabel pengguna_lulusan
-        'id_instansi', // Foreign key ke tabel instansi
+        'id_profesi', // Ganti dari 'profesi' dan 'kategori_profesi'
+        'id_pengguna_lulusan',
+        'id_instansi',
     ];
 
     /**
@@ -43,5 +42,20 @@ class Alumni extends Model
     public function instansi()
     {
         return $this->belongsTo(Instansi::class, 'id_instansi', 'id_instansi');
+    }
+
+    public function jawaban()
+    {
+        return $this->hasOne(Jawaban::class, 'nim_alumni', 'nim');
+    }
+
+    public function prodi()
+    {
+        return $this->belongsTo(Prodi::class, 'id_prodi');
+    }
+
+    public function profesi()
+    {
+        return $this->belongsTo(Profesi::class, 'id_profesi');
     }
 }
