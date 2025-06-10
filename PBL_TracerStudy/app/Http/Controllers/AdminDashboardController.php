@@ -43,20 +43,13 @@ class AdminDashboardController extends Controller
         $instansiLabels = $instansi->pluck('jenis_instansi')->toArray();
         $instansiData = $instansi->pluck('total')->toArray();
 
-        // Kriteria Pertanyaan
-        $kriteria = [
-            4 => 'Kerjasama Tim',
-            5 => 'Keahlian di bidang TI',
-            6 => 'Kemampuan berbahasa asing (Inggris)',
-            7 => 'Kemampuan berkomunikasi',
-            8 => 'Pengembangan diri',
-            9 => 'Kepemimpinan',
-            10 => 'Etos Kerja',
-        ];
+        // KEPUASAN PENGGUNA LULUSAN (dinamis berdasarkan tabel pertanyaan kategori 'pengguna_lulusan')
+        $pertanyaan = DB::table('pertanyaan')
+            ->where('kategori', 'pengguna_lulusan')
+            ->pluck('isi_pertanyaan', 'id_pertanyaan');
 
         $kriteriaChartData = [];
-
-        foreach ($kriteria as $id => $label) {
+        foreach ($pertanyaan as $id => $label) {
             $jawaban = DB::table('jawaban')
                 ->select('jawaban', DB::raw('count(*) as total'))
                 ->where('id_pertanyaan', $id)
@@ -86,7 +79,7 @@ class AdminDashboardController extends Controller
             'instansiData',
             'masaTunggu',
             'sebaranLingkup',
-            'kriteriaChartData',
+            'kriteriaChartData'
         ));
     }
 
@@ -119,6 +112,7 @@ class AdminDashboardController extends Controller
 
         return $masaTunggu;
     }
+
 
     public function export_excel()
     {
@@ -221,7 +215,7 @@ class AdminDashboardController extends Controller
     }
 
 
-    function getSebaranLingkupProfesiData()
+      protected function getSebaranLingkupProfesiData()
     {
         $tahunLulus = Alumni::selectRaw('YEAR(tgl_lulus) as tahun')
             ->whereNotNull('tgl_lulus')
@@ -230,39 +224,35 @@ class AdminDashboardController extends Controller
             ->pluck('tahun');
 
         $data = [];
+        foreach ($tahunLulus as $tahun) {
+            $alumniTahun = Alumni::with('instansi')->whereYear('tgl_lulus', $tahun);
+            $jumlahLulusan = $alumniTahun->count();
+            $terlacak = (clone $alumniTahun)->whereNotNull('id_profesi')->count();
 
-            foreach ($tahunLulus as $tahun) {
-        $alumniTahun = Alumni::with('instansi')->whereYear('tgl_lulus', $tahun);
+            $alumniJoinProfesi = DB::table('alumni')
+                ->join('profesi', 'alumni.id_profesi', '=', 'profesi.id_profesi')
+                ->whereYear('tgl_lulus', $tahun);
 
-        $jumlahLulusan = $alumniTahun->count();
-        $terlacak = (clone $alumniTahun)->whereNotNull('id_profesi')->count();
+            $bidangInfokom = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Infokom')->count();
+            $bidangNonInfokom = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Non Infokom')->count();
+            $wirausaha = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Wirausaha')->count();
 
-        // JOIN ke tabel profesi karena kategori_profesi ada di tabel tersebut
-        $alumniJoinProfesi = DB::table('alumni')
-            ->join('profesi', 'alumni.id_profesi', '=', 'profesi.id_profesi')
-            ->whereYear('tgl_lulus', $tahun);
+            $internasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Multinasional'))->count();
+            $nasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Nasional'))->count();
 
-        $bidangInfokom = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Infokom')->count();
-        $bidangNonInfokom = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Non Infokom')->count();
-        $wirausaha = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Wirausaha')->count();
+            $data[] = [
+                'tahun' => $tahun,
+                'jumlah_lulusan' => $jumlahLulusan,
+                'terlacak' => $terlacak,
+                'infokom' => $bidangInfokom,
+                'non_infokom' => $bidangNonInfokom,
+                'internasional' => $internasional,
+                'nasional' => $nasional,
+                'wirausaha' => $wirausaha,
+            ];
+        }
 
-        $internasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Internasional'))->count();
-        $nasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Nasional'))->count();
-
-        $data[] = [
-            'tahun' => $tahun,
-            'jumlah_lulusan' => $jumlahLulusan,
-            'terlacak' => $terlacak,
-            'infokom' => $bidangInfokom,
-            'non_infokom' => $bidangNonInfokom,
-            'internasional' => $internasional,
-            'nasional' => $nasional,
-            'wirausaha' => $wirausaha,
-        ];
-    }
-
-
-            return $data;
+        return $data;
     }
         public function exportLingkupKerja()
     {
