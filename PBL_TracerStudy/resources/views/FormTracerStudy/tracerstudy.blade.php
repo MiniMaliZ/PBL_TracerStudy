@@ -268,7 +268,7 @@
                     <div class="col-md-6">
                         <label for="prodi" class="form-label">Program Studi</label>
                         <input type="text" class="form-control" id="prodi" name="prodi"
-                            placeholder="Program Studi" required>
+                            placeholder="Program Studi" required readonly>
                     </div>
                     <div class="col-md-6">
                         <label for="tgl_lulus" class="form-label">Tanggal Lulus</label>
