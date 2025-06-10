@@ -71,80 +71,103 @@
                     <i class="fas fa-file-import"></i> Import Alumni
                 </button>
 
-                {{-- Dropdown Download --}}
+                {{-- Dropdown Download dengan perbaikan --}}
                 <div class="dropdown">
                     <button class="btn btn-success dropdown-toggle" type="button" id="dropdownExport"
-                        data-bs-toggle="dropdown" aria-expanded="false">
+                        data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="true">
                         <i class="fas fa-download"></i> Download
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownExport">
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownExport"
+                        style="min-width: 300px; max-height: 400px; overflow-y: auto;">
                         <li>
-                            <h6 class="dropdown-header">Template</h6>
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-file-download me-2"></i>Template
+                            </h6>
                         </li>
-                        <li><a class="dropdown-item" href="{{ route('alumni.template') }}">
-                                <i class="fas fa-file-excel text-success"></i> Template Import
-                            </a></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center py-2" href="{{ route('alumni.template') }}">
+                                <i class="fas fa-file-excel text-success me-3"></i>
+                                <div>
+                                    <div class="fw-bold">Template Import</div>
+                                    <small class="text-muted">File Excel untuk import data</small>
+                                </div>
+                            </a>
+                        </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <h6 class="dropdown-header">Export Data</h6>
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-download me-2"></i>Export Data
+                            </h6>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" onclick="exportData('semua')">
-                                <i class="fas fa-users text-primary"></i> Semua Alumni
-                                @if (request()->anyFilled([
-                                        'search',
-                                        'filter_prodi',
-                                        'filter_jurusan',
-                                        'filter_tahun_masuk',
-                                        'filter_profesi',
-                                        'filter_tahun_lulus',
-                                    ]))
-                                    <small class="text-muted">({{ $alumni->count() }} data terfilter)</small>
-                                @else
-                                    <small class="text-muted">({{ $alumni->count() }} data)</small>
-                                @endif
+                            <a class="dropdown-item d-flex align-items-center py-2" href="#"
+                                onclick="exportData('semua')">
+                                <i class="fas fa-users text-primary me-3"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">Semua Alumni</div>
+                                    @if (request()->anyFilled([
+                                            'search',
+                                            'filter_prodi',
+                                            'filter_jurusan',
+                                            'filter_tahun_masuk',
+                                            'filter_profesi',
+                                            'filter_tahun_lulus',
+                                        ]))
+                                        <small class="text-muted">{{ $alumni->count() }} data terfilter</small>
+                                    @else
+                                        <small class="text-muted">{{ $alumni->count() }} total data</small>
+                                    @endif
+                                </div>
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" onclick="exportData('sudah')">
-                                <i class="fas fa-user-check text-success"></i> Alumni Sudah Mengisi Lengkap
-                                <small class="text-muted">
-                                    ({{ $alumni->filter(function ($item) {
-                                            return !is_null($item->no_hp) &&
-                                                !is_null($item->email) &&
-                                                !is_null($item->tanggal_kerja_pertama) &&
-                                                !is_null($item->tanggal_mulai_instansi) &&
-                                                !is_null($item->masa_tunggu) &&
-                                                !is_null($item->id_profesi) &&
-                                                !is_null($item->id_pengguna_lulusan) &&
-                                                !is_null($item->id_instansi) &&
-                                                trim($item->no_hp) !== '' &&
-                                                trim($item->email) !== '';
-                                        })->count() }}
-                                    data)
-                                </small>
+                            <a class="dropdown-item d-flex align-items-center py-2" href="#"
+                                onclick="exportData('sudah')">
+                                <i class="fas fa-user-check text-success me-3"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">Alumni Sudah Mengisi Lengkap</div>
+                                    <small class="text-muted">
+                                        {{ $alumni->filter(function ($item) {
+                                                return !is_null($item->no_hp) &&
+                                                    !is_null($item->email) &&
+                                                    !is_null($item->tanggal_kerja_pertama) &&
+                                                    !is_null($item->tanggal_mulai_instansi) &&
+                                                    !is_null($item->masa_tunggu) &&
+                                                    !is_null($item->id_profesi) &&
+                                                    !is_null($item->id_pengguna_lulusan) &&
+                                                    !is_null($item->id_instansi) &&
+                                                    trim($item->no_hp) !== '' &&
+                                                    trim($item->email) !== '';
+                                            })->count() }}
+                                        data lengkap
+                                    </small>
+                                </div>
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" onclick="exportData('belum')">
-                                <i class="fas fa-user-times text-warning"></i> Alumni Belum Mengisi Lengkap
-                                <small class="text-muted">
-                                    ({{ $alumni->filter(function ($item) {
-                                            return is_null($item->no_hp) ||
-                                                is_null($item->email) ||
-                                                is_null($item->tanggal_kerja_pertama) ||
-                                                is_null($item->tanggal_mulai_instansi) ||
-                                                is_null($item->masa_tunggu) ||
-                                                is_null($item->id_profesi) ||
-                                                is_null($item->id_pengguna_lulusan) ||
-                                                is_null($item->id_instansi) ||
-                                                trim($item->no_hp ?? '') === '' ||
-                                                trim($item->email ?? '') === '';
-                                        })->count() }}
-                                    data)
-                                </small>
+                            <a class="dropdown-item d-flex align-items-center py-2" href="#"
+                                onclick="exportData('belum')">
+                                <i class="fas fa-user-times text-warning me-3"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">Alumni Belum Mengisi Lengkap</div>
+                                    <small class="text-muted">
+                                        {{ $alumni->filter(function ($item) {
+                                                return is_null($item->no_hp) ||
+                                                    is_null($item->email) ||
+                                                    is_null($item->tanggal_kerja_pertama) ||
+                                                    is_null($item->tanggal_mulai_instansi) ||
+                                                    is_null($item->masa_tunggu) ||
+                                                    is_null($item->id_profesi) ||
+                                                    is_null($item->id_pengguna_lulusan) ||
+                                                    is_null($item->id_instansi) ||
+                                                    trim($item->no_hp ?? '') === '' ||
+                                                    trim($item->email ?? '') === '';
+                                            })->count() }}
+                                        data belum lengkap
+                                    </small>
+                                </div>
                             </a>
                         </li>
                     </ul>
@@ -529,4 +552,49 @@
             }
         });
     </script>
+
+    {{-- Custom CSS untuk dropdown --}}
+    <style>
+        .dropdown-menu {
+            border: 1px solid #dee2e6;
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            border-radius: 0.375rem;
+            z-index: 1050 !important;
+        }
+        
+        .dropdown-menu.show {
+            display: block !important;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .dropdown-header {
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .card-header {
+            overflow: visible !important;
+        }
+        
+        .card {
+            overflow: visible !important;
+        }
+        
+        /* Ensure dropdown stays above other elements */
+        .dropdown {
+            position: relative;
+            z-index: 1000;
+        }
+        
+        .dropdown-menu {
+            position: absolute !important;
+            will-change: transform;
+        }
+    </style>
 @endsection

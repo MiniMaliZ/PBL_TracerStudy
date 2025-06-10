@@ -82,6 +82,7 @@ Route::get('alumni/prodi-by-jurusan', [AlumniController::class, 'getProdiByJurus
 Route::resource('instansi', InstansiController::class);
 
 Route::resource('penggunaLulusan', PenggunaLulusanController::class);
+Route::get('penggunaLulusan/{id}/alumni', [PenggunaLulusanController::class, 'showAlumni'])->name('penggunaLulusan.showAlumni');
 Route::get('/pengguna-lulusan/export', [PenggunaLulusanController::class, 'export'])->name('penggunaLulusan.export');
 Route::get('/pengguna-lulusan/export-sudah-survey', [PenggunaLulusanController::class, 'exportSudahIsiSurvey'])->name('penggunaLulusan.exportSudahIsiSurvey');
 

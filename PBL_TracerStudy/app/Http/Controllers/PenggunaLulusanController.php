@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PenggunaLulusan;
+use App\Models\Alumni;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -15,10 +16,37 @@ class PenggunaLulusanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $penggunaLulusan = PenggunaLulusan::all();
+        $query = PenggunaLulusan::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_atasan', 'LIKE', "%{$search}%")
+                    ->orWhere('jabatan_atasan', 'LIKE', "%{$search}%")
+                    ->orWhere('email_atasan', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $penggunaLulusan = $query->orderBy('nama_atasan', 'asc')->get();
+
         return view('admin.PenggunaLulusan.indexPenggunaLulusan', compact('penggunaLulusan'));
+    }
+
+    // Menampilkan detail alumni dari pengguna lulusan tertentu
+    public function showAlumni($id)
+    {
+        $penggunaLulusan = PenggunaLulusan::findOrFail($id);
+
+        // Get alumni yang terkait dengan pengguna lulusan ini
+        $alumni = Alumni::with(['prodi', 'profesi', 'instansi'])
+            ->where('id_pengguna_lulusan', $id)
+            ->orderBy('nama_alumni', 'asc')
+            ->get();
+
+        return view('admin.PenggunaLulusan.detailAlumni', compact('penggunaLulusan', 'alumni'));
     }
 
     /**
@@ -85,34 +113,27 @@ class PenggunaLulusanController extends Controller
             ->with('success', 'Pengguna Lulusan berhasil dihapus.');
     }
 
+    /**
+     * Export pengguna lulusan yang belum mengisi survey
+     */
     public function export()
     {
-        // Ambil data pengguna lulusan dengan alumni yang datanya lengkap tapi belum dinilai
+        // Ambil pengguna lulusan yang belum ada di tabel jawaban
         $penggunaLulusan = PenggunaLulusan::with(['alumni' => function ($query) {
-            // Filter alumni yang datanya sudah lengkap dan belum ada di tabel jawaban
             $query->whereNotNull('nama_alumni')
-                ->whereNotNull('prodi')
-                ->whereNotNull('no_hp')
-                ->whereNotNull('email')
-                ->whereNotNull('tahun_masuk')
-                ->whereNotNull('tgl_lulus')
-                ->whereNotNull('tanggal_kerja_pertama')
-                ->whereNotNull('tanggal_mulai_instansi')
-                ->whereNotNull('masa_tunggu')
-                ->whereNotNull('kategori_profesi')
-                ->whereNotNull('profesi')
-                ->whereNotNull('id_pengguna_lulusan')
-                ->whereNotNull('id_instansi')
+                ->whereNotNull('id_prodi')  // Sekarang menggunakan id_prodi (foreign key)
                 ->where('nama_alumni', '!=', '')
-                ->where('prodi', '!=', '')
-                ->where('no_hp', '!=', '')
-                ->where('email', '!=', '')
-                ->where('profesi', '!=', '')
-                ->whereDoesntHave('jawaban') // Belum ada di tabel jawaban
-                ->with('instansi');
-        }])->get();
+                ->with(['prodi', 'instansi']);  // Load relasi prodi dan instansi
+        }])
+            ->whereNotIn('id_pengguna_lulusan', function ($subQuery) {
+                $subQuery->select('id_pengguna_lulusan')
+                    ->from('jawaban')
+                    ->whereNotNull('id_pengguna_lulusan');
+            })
+            ->orderBy('nama_atasan', 'asc')
+            ->get();
 
-        // Filter hanya pengguna lulusan yang memiliki alumni dengan data lengkap tapi belum dinilai
+        // Filter hanya yang punya alumni
         $penggunaLulusan = $penggunaLulusan->filter(function ($pengguna) {
             return $pengguna->alumni->isNotEmpty();
         });
@@ -121,8 +142,8 @@ class PenggunaLulusanController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Set header sesuai gambar
-        $headers = ['Nama', 'Instansi', 'Jabatan', 'No HP', 'Email', 'Nama Alumni', 'Program Studi', 'Tahun Lulus'];
+        // Set header sesuai permintaan
+        $headers = ['Nama', 'Instansi', 'Jabatan', 'Nama Alumni', 'Program Studi', 'Tahun Lulus'];
         $sheet->fromArray($headers, null, 'A1');
 
         // Style untuk header
@@ -143,17 +164,16 @@ class PenggunaLulusanController extends Controller
                 ],
             ],
         ];
-        $sheet->getStyle('A1:H1')->applyFromArray($headerStyle);
+        $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
 
         // Auto width untuk semua kolom
-        foreach (range('A', 'H') as $column) {
+        foreach (range('A', 'F') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
         // Isi data
         $row = 2;
         foreach ($penggunaLulusan as $pengguna) {
-            // Tampilkan setiap alumni yang datanya lengkap tapi belum dinilai
             foreach ($pengguna->alumni as $alumni) {
                 // Ambil tahun dari tgl_lulus
                 $tahunLulus = '-';
@@ -165,10 +185,8 @@ class PenggunaLulusanController extends Controller
                     $pengguna->nama_atasan ?? '-',
                     $alumni->instansi->nama_instansi ?? '-',
                     $pengguna->jabatan_atasan ?? '-',
-                    $alumni->no_hp ?? '-',
-                    $pengguna->email_atasan ?? '-',
                     $alumni->nama_alumni ?? '-',
-                    $alumni->prodi ?? '-',
+                    $alumni->prodi->nama_prodi ?? '-',  // Menggunakan relasi prodi
                     $tahunLulus
                 ];
                 $sheet->fromArray($data, null, 'A' . $row);
@@ -178,14 +196,14 @@ class PenggunaLulusanController extends Controller
 
         // Jika tidak ada data
         if ($row == 2) {
-            $sheet->setCellValue('A2', 'Tidak ada alumni dengan data lengkap yang belum dinilai');
-            $sheet->mergeCells('A2:H2');
+            $sheet->setCellValue('A2', 'Tidak ada pengguna lulusan yang belum mengisi survey');
+            $sheet->mergeCells('A2:F2');
             $row = 3;
         }
 
         // Set border untuk semua data
         if ($row > 2) {
-            $dataRange = 'A1:H' . ($row - 1);
+            $dataRange = 'A1:F' . ($row - 1);
             $sheet->getStyle($dataRange)->applyFromArray([
                 'borders' => [
                     'allBorders' => [
@@ -197,7 +215,7 @@ class PenggunaLulusanController extends Controller
 
         // Buat writer dan download
         $writer = new Xlsx($spreadsheet);
-        $filename = 'alumni_data_lengkap_belum_dinilai_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $filename = 'pengguna_lulusan_belum_survey_' . date('Y-m-d_H-i-s') . '.xlsx';
 
         // Set headers untuk download
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -208,49 +226,40 @@ class PenggunaLulusanController extends Controller
         exit;
     }
 
+    /**
+     * Export pengguna lulusan yang sudah mengisi survey
+     */
     public function exportSudahIsiSurvey()
     {
-        // TAMBAHKAN QUERY INI YANG HILANG!
+        // Ambil pengguna lulusan yang sudah ada di tabel jawaban
         $penggunaLulusan = PenggunaLulusan::with(['alumni' => function ($query) {
-            // Filter alumni yang datanya sudah lengkap dan sudah ada di tabel jawaban
             $query->whereNotNull('nama_alumni')
-                ->whereNotNull('prodi')
-                ->whereNotNull('no_hp')
-                ->whereNotNull('email')
-                ->whereNotNull('tahun_masuk')
-                ->whereNotNull('tgl_lulus')
-                ->whereNotNull('tanggal_kerja_pertama')
-                ->whereNotNull('tanggal_mulai_instansi')
-                ->whereNotNull('masa_tunggu')
-                ->whereNotNull('kategori_profesi')
-                ->whereNotNull('profesi')
-                ->whereNotNull('id_pengguna_lulusan')
-                ->whereNotNull('id_instansi')
+                ->whereNotNull('id_prodi')
                 ->where('nama_alumni', '!=', '')
-                ->where('prodi', '!=', '')
-                ->where('no_hp', '!=', '')
-                ->where('email', '!=', '')
-                ->where('profesi', '!=', '')
-                ->whereIn('nim', function ($subQuery) {
-                    $subQuery->select('nim_alumni')
-                        ->from('jawaban')
-                        ->whereNotNull('nim_alumni');
-                })
-                ->with('instansi');
-        }])->get();
+                ->with(['prodi', 'instansi']);
+        }])
+        ->whereIn('id_pengguna_lulusan', function ($subQuery) {
+            $subQuery->select('id_pengguna_lulusan')
+                ->from('jawaban')
+                ->whereNotNull('id_pengguna_lulusan');
+        })
+        ->orderBy('nama_atasan', 'asc')
+        ->get();
 
-        // Filter hanya pengguna lulusan yang memiliki alumni dengan data lengkap dan sudah dinilai
+        // Filter hanya yang punya alumni dan sudah ada jawaban untuk alumni tersebut
         $penggunaLulusan = $penggunaLulusan->filter(function ($pengguna) {
             return $pengguna->alumni->isNotEmpty();
         });
 
-        // Ambil semua pertanyaan secara dinamis
+        // Ambil semua pertanyaan yang berkategori pengguna_lulusan
         $pertanyaanPenilaian = DB::table('pertanyaan')
+            ->where('kategori', 'pengguna_lulusan')
             ->where('metodejawaban', 1)
             ->orderBy('id_pertanyaan')
             ->get();
 
         $pertanyaanMasukan = DB::table('pertanyaan')
+            ->where('kategori', 'pengguna_lulusan')
             ->where('metodejawaban', 2)
             ->orderBy('id_pertanyaan')
             ->get();
@@ -264,8 +273,6 @@ class PenggunaLulusanController extends Controller
             'Nama',
             'Instansi',
             'Jabatan',
-            'No HP',
-            'Email',
             'Nama Alumni',
             'Program Studi',
             'Tahun Lulus'
@@ -332,16 +339,29 @@ class PenggunaLulusanController extends Controller
         $row = 2;
         foreach ($penggunaLulusan as $pengguna) {
             foreach ($pengguna->alumni as $alumni) {
+                // **PENTING**: Cek apakah ada jawaban untuk alumni ini (berdasarkan nim_alumni)
+                $adaJawaban = DB::table('jawaban')
+                    ->where('nim_alumni', $alumni->nim)
+                    ->where('id_pengguna_lulusan', $pengguna->id_pengguna_lulusan)
+                    ->exists();
+
+                // Hanya export jika ada jawaban untuk alumni ini
+                if (!$adaJawaban) {
+                    continue;
+                }
+
                 // Ambil tahun dari tgl_lulus
                 $tahunLulus = '-';
                 if ($alumni->tgl_lulus) {
                     $tahunLulus = date('Y', strtotime($alumni->tgl_lulus));
                 }
 
-                // Ambil semua jawaban untuk alumni ini
+                // Ambil semua jawaban untuk pengguna lulusan ini DAN alumni ini (berdasarkan nim_alumni)
                 $jawabanPenilaian = DB::table('jawaban')
                     ->join('pertanyaan', 'jawaban.id_pertanyaan', '=', 'pertanyaan.id_pertanyaan')
-                    ->where('jawaban.nim_alumni', $alumni->nim)
+                    ->where('jawaban.id_pengguna_lulusan', $pengguna->id_pengguna_lulusan)
+                    ->where('jawaban.nim_alumni', $alumni->nim)  // Filter berdasarkan nim alumni
+                    ->where('pertanyaan.kategori', 'pengguna_lulusan')
                     ->where('pertanyaan.metodejawaban', 1)
                     ->select('pertanyaan.id_pertanyaan', 'jawaban.jawaban')
                     ->get()
@@ -349,7 +369,9 @@ class PenggunaLulusanController extends Controller
 
                 $jawabanMasukan = DB::table('jawaban')
                     ->join('pertanyaan', 'jawaban.id_pertanyaan', '=', 'pertanyaan.id_pertanyaan')
-                    ->where('jawaban.nim_alumni', $alumni->nim)
+                    ->where('jawaban.id_pengguna_lulusan', $pengguna->id_pengguna_lulusan)
+                    ->where('jawaban.nim_alumni', $alumni->nim)  // Filter berdasarkan nim alumni
+                    ->where('pertanyaan.kategori', 'pengguna_lulusan')
                     ->where('pertanyaan.metodejawaban', 2)
                     ->select('pertanyaan.id_pertanyaan', 'jawaban.jawaban')
                     ->get()
@@ -360,10 +382,8 @@ class PenggunaLulusanController extends Controller
                     $pengguna->nama_atasan ?? '-',
                     $alumni->instansi->nama_instansi ?? '-',
                     $pengguna->jabatan_atasan ?? '-',
-                    $alumni->no_hp ?? '-',
-                    $pengguna->email_atasan ?? '-',
                     $alumni->nama_alumni ?? '-',
-                    $alumni->prodi ?? '-',
+                    $alumni->prodi->nama_prodi ?? '-',
                     $tahunLulus,
                 ];
 
@@ -392,7 +412,7 @@ class PenggunaLulusanController extends Controller
 
         // Jika tidak ada data
         if ($row == 2) {
-            $sheet->setCellValue('A2', 'Tidak ada alumni yang sudah dinilai');
+            $sheet->setCellValue('A2', 'Tidak ada pengguna lulusan yang sudah mengisi survey');
             $sheet->mergeCells('A2:' . $lastColumn . '2');
             $row = 3;
         }
@@ -411,7 +431,7 @@ class PenggunaLulusanController extends Controller
 
         // Buat writer dan download
         $writer = new Xlsx($spreadsheet);
-        $filename = 'alumni_sudah_dinilai_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $filename = 'pengguna_lulusan_sudah_survey_' . date('Y-m-d_H-i-s') . '.xlsx';
 
         // Set headers untuk download
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
