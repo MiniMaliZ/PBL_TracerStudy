@@ -13,14 +13,14 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // PROFESI
+       // PROFESI
         $profesi = DB::table('alumni')
-        ->join('profesi', 'alumni.id_profesi', '=', 'profesi.id_profesi')
-        ->select('profesi.nama_profesi as profesi', DB::raw('count(*) as total'))
-        ->whereNotNull('alumni.id_profesi')
-        ->groupBy('profesi.nama_profesi')
-        ->orderByDesc('total')
-        ->get();
+            ->join('profesi', 'alumni.id_profesi', '=', 'profesi.id_profesi')
+            ->select('profesi.nama_profesi as profesi', DB::raw('count(*) as total'))
+            ->whereNotNull('alumni.id_profesi')
+            ->groupBy('profesi.nama_profesi')
+            ->orderByDesc('total')
+            ->get();
 
         $topProfesi = $profesi->take(10);
         $sisa = $profesi->skip(10)->sum('total');
@@ -33,19 +33,19 @@ class AdminDashboardController extends Controller
         }
 
         // INSTANSI
-            $instansi = DB::table('alumni')
-        ->join('instansi', 'alumni.id_instansi', '=', 'instansi.id_instansi')
-        ->select('instansi.jenis_instansi', DB::raw('count(*) as total'))
-        ->groupBy('instansi.jenis_instansi')
-        ->get();
-
+        $instansi = DB::table('alumni')
+            ->join('instansi', 'alumni.id_instansi', '=', 'instansi.id_instansi')
+            ->select('instansi.jenis_instansi', DB::raw('count(*) as total'))
+            ->groupBy('instansi.jenis_instansi')
+            ->get();
 
         $instansiLabels = $instansi->pluck('jenis_instansi')->toArray();
         $instansiData = $instansi->pluck('total')->toArray();
 
-        // KEPUASAN PENGGUNA LULUSAN (dinamis berdasarkan tabel pertanyaan kategori 'pengguna_lulusan')
+        // KEPUASAN PENGGUNA LULUSAN (DARI pertanyaan DENGAN metodejawaban = 1)
         $pertanyaan = DB::table('pertanyaan')
             ->where('kategori', 'pengguna_lulusan')
+            ->where('metodejawaban', 1)
             ->pluck('isi_pertanyaan', 'id_pertanyaan');
 
         $kriteriaChartData = [];
@@ -113,8 +113,7 @@ class AdminDashboardController extends Controller
         return $masaTunggu;
     }
 
-
-    public function export_excel()
+        public function export_excel()
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -124,16 +123,11 @@ class AdminDashboardController extends Controller
             ['No', 'Jenis Kemampuan', 'Sangat Kurang (%)', 'Kurang (%)', 'Cukup (%)', 'Baik (%)', 'Sangat Baik (%)']
         ], null, 'A1');
 
-        // Mapping ID Pertanyaan ke Nama Kemampuan
-        $kriteria = [
-            4 => 'Kerjasama Tim',
-            5 => 'Keahlian di bidang TI',
-            6 => 'Kemampuan berbahasa asing (Inggris)',
-            7 => 'Kemampuan berkomunikasi',
-            8 => 'Pengembangan diri',
-            9 => 'Kepemimpinan',
-            10 => 'Etos Kerja',
-        ];
+        // Ambil semua pertanyaan dari kategori pengguna_lulusan dan metodejawaban 1
+        $kriteria = DB::table('pertanyaan')
+            ->where('kategori', 'pengguna_lulusan')
+            ->where('metodejawaban', 1)
+            ->pluck('isi_pertanyaan', 'id_pertanyaan');
 
         $kategoriLabel = [
             1 => 'Sangat Kurang',
@@ -153,7 +147,7 @@ class AdminDashboardController extends Controller
 
         $row = 2;
         $no = 1;
-        $jumlahKemampuan = count($kriteria);
+        $jumlahKemampuan = $kriteria->count();
 
         foreach ($kriteria as $idPertanyaan => $namaKemampuan) {
             $total = DB::table('jawaban')
@@ -171,11 +165,9 @@ class AdminDashboardController extends Controller
                 $persen = $total > 0 ? round(($jumlah / $total) * 100, 2) : 0;
                 $persentase[$label] = $persen;
 
-                // Tambahkan ke total rata-rata
                 $rataRata[$label] += $persen;
             }
 
-            // Isi baris data ke sheet
             $sheet->fromArray([
                 $no++,
                 $namaKemampuan,
