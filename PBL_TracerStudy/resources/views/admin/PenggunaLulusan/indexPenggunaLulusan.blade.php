@@ -6,7 +6,15 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Daftar Pengguna Lulusan</h4>
-        <a href="{{ route('penggunaLulusan.create') }}" class="btn btn-primary">Tambah Data</a>
+        <div>
+            <a href="{{ route('penggunaLulusan.export') }}" class="btn btn-warning me-2">
+                <i class="fas fa-file-excel"></i> Export Belum Survey
+            </a>
+            <a href="{{ route('penggunaLulusan.exportSudahIsiSurvey') }}" class="btn btn-success me-2">
+                <i class="fas fa-file-excel"></i> Export Sudah Survey
+            </a>
+            <a href="{{ route('penggunaLulusan.create') }}" class="btn btn-primary">Tambah Data</a>
+        </div>
     </div>
     <div class="card-body">
         @if(session('success'))
