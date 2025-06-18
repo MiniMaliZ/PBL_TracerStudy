@@ -16,6 +16,7 @@
     <link href="{{ asset('material-dashboard-master/assets/css/material-dashboard.css?v=3.2.0') }}" rel="stylesheet" />
     <link href="{{ asset('material-dashboard-master/assets/css/custom.css') }}" rel="stylesheet" />
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -46,7 +47,7 @@
 
         <!-- DataTables JS -->
         <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
+        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
     @yield('scripts')
     @stack('js')

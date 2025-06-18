@@ -9,21 +9,29 @@ return new class extends Migration {
         Schema::create('alumni', function (Blueprint $table) {
             $table->string('nim', 20)->primary(); // Primary key
             $table->string('nama_alumni', 100); // Nama alumni
-            $table->string('prodi', 100); // Program studi
+            $table->unsignedBigInteger('id_prodi'); // Foreign key ke prodi
             $table->string('no_hp', 20)->nullable(); // Nomor HP alumni
             $table->string('email', 100)->nullable(); // Email alumni
             $table->year('tahun_masuk')->nullable(); // Tahun masuk
             $table->date('tgl_lulus'); // Tanggal lulus
             $table->date('tanggal_kerja_pertama')->nullable(); // Tanggal kerja pertama
-            $table->date('tanggal_mulai_instansi')->nullable(); // Tanggal kerja pertama
+            $table->date('tanggal_mulai_instansi')->nullable(); // Tanggal mulai instansi
             $table->integer('masa_tunggu')->nullable(); // Masa tunggu kerja
-            $table->enum('kategori_profesi', ['Infokom','Non Infokom'])->nullable(); // Kategori profesi
-            $table->string('profesi', 100)->nullable(); // Profesi
+            $table->unsignedBigInteger('id_profesi')->nullable(); // Foreign key ke profesi
             $table->unsignedBigInteger('id_pengguna_lulusan')->nullable(); // Foreign key ke pengguna_lulusan
-            $table->unsignedBigInteger('id_instansi')->nullable(); // Foreign key ke pengguna_lulusan
-            
+            $table->unsignedBigInteger('id_instansi')->nullable(); // Foreign key ke instansi
 
-            // Relasi ke tabel pengguna_lulusan
+            // Foreign Key Constraints
+            $table->foreign('id_prodi')
+                ->references('id_prodi')
+                ->on('prodi')
+                ->onDelete('restrict'); // Tidak boleh hapus prodi yang masih digunakan
+
+            $table->foreign('id_profesi')
+                ->references('id_profesi')
+                ->on('profesi')
+                ->onDelete('set null'); // Jika profesi dihapus, set null
+
             $table->foreign('id_pengguna_lulusan')
                 ->references('id_pengguna_lulusan')
                 ->on('pengguna_lulusan')
@@ -32,7 +40,7 @@ return new class extends Migration {
             $table->foreign('id_instansi')
                 ->references('id_instansi')
                 ->on('instansi')
-                ->onDelete('set null'); // Jika id_instansi dihapus, set null
+                ->onDelete('set null'); // Jika instansi dihapus, set null
         });
     }
 

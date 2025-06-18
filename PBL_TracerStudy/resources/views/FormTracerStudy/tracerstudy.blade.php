@@ -268,11 +268,11 @@
                     <div class="col-md-6">
                         <label for="prodi" class="form-label">Program Studi</label>
                         <input type="text" class="form-control" id="prodi" name="prodi"
-                            placeholder="Program Studi" required>
+                            placeholder="Program Studi" required readonly>
                     </div>
                     <div class="col-md-6">
                         <label for="tgl_lulus" class="form-label">Tanggal Lulus</label>
-                        <input type="date" class="form-control" id="tgl_lulus" name="tgl_lulus" required>
+                        <input type="date" class="form-control" id="tgl_lulus" name="tgl_lulus" required readonly>
                     </div>
                     <div class="col-md-6">
                         <label for="tahun_masuk" class="form-label">Tahun Angkatan</label>
@@ -330,7 +330,7 @@
                             name="tanggal_mulai_instansi" placeholder="DD/MM/YYYY" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="lokasi_instansi" class="form-label">Lokasi Instansi</label>
+                        <label for="lokasi_instansi" class="form-label">Alamat Instansi</label>
                         <input type="text" class="form-control" id="lokasi_instansi" name="lokasi_instansi"
                             required>
                     </div>
@@ -342,10 +342,23 @@
                             <option value="non infokom">Non Infokom</option>
                         </select>
                     </div>
+                    
                     <div class="col-md-6">
                         <label for="profesi" class="form-label">Profesi</label>
-                        <input type="text" class="form-control" id="profesi" name="profesi" required>
+                        <input type="text" class="form-control" id="profesi" name="profesi"
+                            list="daftar_profesi" placeholder="profesi Anda" required>
+                        <datalist id="daftar_profesi">
+                            <option value="Software Developer">
+                            <option value="Web Developer">
+                            <option value="Mobile Developer">
+                            <option value="Data Analyst">
+                            <option value="System Administrator">
+                            <option value="Network Engineer">
+                            <option value="Database Administrator">
+                            <option value="UI/UX Designer">
+                        </datalist>
                     </div>
+
                     <div class="col-md-6">
                         <label for="no_hp_instansi" class="form-label">No telp Instansi</label>
                         <input type="text" class="form-control" id="no_hp_instansi" name="no_hp_instansi"

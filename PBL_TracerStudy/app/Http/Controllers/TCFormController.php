@@ -7,6 +7,7 @@ use App\Models\Instansi;
 use App\Models\Jawaban;
 use App\Models\PenggunaLulusan;
 use App\Models\Pertanyaan;
+use App\Models\Profesi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -37,7 +38,8 @@ class TCFormController extends Controller
 
     public function getAlumniData($keyword)
     {
-        $alumni = Alumni::where('nim', 'LIKE', '%' . $keyword . '%')
+        $alumni = Alumni::with('prodi')
+            ->where('nim', 'LIKE', '%' . $keyword . '%')
             ->orWhere('nama_alumni', 'LIKE', '%' . $keyword . '%')
             ->first();
 
@@ -45,13 +47,14 @@ class TCFormController extends Controller
             return response()->json([
                 'nama_alumni' => $alumni->nama_alumni,
                 'nim' => $alumni->nim,
-                'prodi' => $alumni->prodi,
+                'prodi' => $alumni->prodi ? $alumni->prodi->nama_prodi : null,
                 'tgl_lulus' => $alumni->tgl_lulus,
             ]);
         }
 
         return response()->json(null);
     }
+
 
     public function create_form(Request $request, $nim)
     {
@@ -67,6 +70,7 @@ class TCFormController extends Controller
         $tanggal_kerja_pertama = Carbon::parse($request->tanggal_kerja_pertama);
         $tanggal_lulus = Carbon::parse($alumni->tgl_lulus);
         $masa_tunggu = $tanggal_lulus->diffInDays($tanggal_kerja_pertama);
+        $masa_tunggu = $tanggal_lulus->diffInDays($tanggal_kerja_pertama, false); // false → hasil negatif
 
         // Cek apakah instansi sudah ada (berdasarkan nama & lokasi)
         $instansi = Instansi::where('nama_instansi', $request->nama_instansi)
@@ -100,16 +104,20 @@ class TCFormController extends Controller
             ]);
         }
 
+        $profesi = Profesi::firstOrCreate([
+            'kategori_profesi' => $request->kategori_profesi,
+            'nama_profesi' => $request->profesi,
+        ]);
+
         $alumni->update([
             'no_hp' => $request->no_hp,
             'email' => $request->email,
             'tahun_masuk' => $request->tahun_masuk,
             'tanggal_kerja_pertama' => $request->tanggal_kerja_pertama,
             'tanggal_mulai_instansi' => $request->tanggal_mulai_instansi,
-            'kategori_profesi' => $request->kategori_profesi,
-            'profesi' => $request->profesi,
             'id_instansi' =>  $instansi->id_instansi,
             'id_pengguna_lulusan' =>  $atasan->id_pengguna_lulusan,
+            'id_profesi' =>  $profesi->id_profesi,
             'masa_tunggu' =>  $masa_tunggu,
         ]);
 
@@ -118,9 +126,6 @@ class TCFormController extends Controller
             'redirect' => url('/tracerstudy/formopsi'),
         ]);
     }
-
-
-
 
     //PenggunaLulusan----------------------------------------PenggunaLulusan----------------------------------PenggunaLulusan
 
