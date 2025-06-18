@@ -27,24 +27,17 @@ use App\Http\Controllers\ForgotPwAdminController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'postlogin'])->name('login.process');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 // Routes yang sudah disinkronkan dengan sistem yang ada
-Route::get('/admin/forgot-password', [ForgotPwAdminController::class, 'showLinkRequestForm'])->name('admin.password.request');
 Route::post('/admin/forgot-password', [ForgotPwAdminController::class, 'sendResetLinkEmail'])->name('admin.password.email');
 Route::get('/admin/reset-password/{token}', [ForgotPwAdminController::class, 'showResetForm'])->name('admin.password.reset');
 Route::post('/admin/reset-password', [ForgotPwAdminController::class, 'reset'])->name('admin.password.update');
-
-// Logout
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Redirect root to login
-Route::get('/', function () {
-    return redirect()->route('login');
-});
 
 // Route::get('register', [AuthController::class, 'register'])->name('register');
 // Route::post('register', [AuthController::class, 'postRegister']);

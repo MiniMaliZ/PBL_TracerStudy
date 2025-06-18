@@ -17,7 +17,14 @@ class Admin extends Authenticatable implements CanResetPassword
     public $timestamps = false;
 
     protected $fillable = ['username', 'email', 'password', 'nama'];
-    protected $hidden = ['password'];
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
     public function pertanyaan()
     {
