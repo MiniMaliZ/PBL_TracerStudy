@@ -44,6 +44,9 @@ Route::post('/admin/reset-password', [ForgotPwAdminController::class, 'reset'])-
 
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard-export_excel', [AdminDashboardController::class, 'export_excel']);
+Route::get('/dashboard-lingkup_kerja', [AdminDashboardController::class, 'exportLingkupKerja']);
+Route::get('/dashboard-masa_tunggu', [AdminDashboardController::class, 'exportMasaTunggu']);
+
 
 Route::get('/pertanyaan', [PertanyaanController::class, 'index'])->name('pertanyaan.index');
 Route::get('/pertanyaan/create', [PertanyaanController::class, 'create'])->name('pertanyaan.create');

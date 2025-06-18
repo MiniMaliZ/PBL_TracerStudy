@@ -8,16 +8,19 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Models\Alumni;
 use App\Models\Instansi;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // PROFESI
+       // PROFESI
         $profesi = DB::table('alumni')
-            ->select('profesi', DB::raw('count(*) as total'))
-            ->whereNotNull('profesi') // Filter untuk menghapus data null
-            ->groupBy('profesi')
+            ->join('profesi', 'alumni.id_profesi', '=', 'profesi.id_profesi')
+            ->select('profesi.nama_profesi as profesi', DB::raw('count(*) as total'))
+            ->whereNotNull('alumni.id_profesi')
+            ->groupBy('profesi.nama_profesi')
             ->orderByDesc('total')
             ->get();
 
@@ -32,28 +35,23 @@ class AdminDashboardController extends Controller
         }
 
         // INSTANSI
-        $instansi = DB::table('instansi')
-            ->select('jenis_instansi', DB::raw('count(*) as total'))
-            ->groupBy('jenis_instansi')
+        $instansi = DB::table('alumni')
+            ->join('instansi', 'alumni.id_instansi', '=', 'instansi.id_instansi')
+            ->select('instansi.jenis_instansi', DB::raw('count(*) as total'))
+            ->groupBy('instansi.jenis_instansi')
             ->get();
 
         $instansiLabels = $instansi->pluck('jenis_instansi')->toArray();
         $instansiData = $instansi->pluck('total')->toArray();
 
-        // Kriteria Pertanyaan
-        $kriteria = [
-            1 => 'Kerjasama Tim',
-            2 => 'Keahlian di bidang TI',
-            3 => 'Kemampuan berbahasa asing (Inggris)',
-            4 => 'Kemampuan berkomunikasi',
-            5 => 'Pengembangan diri',
-            6 => 'Kepemimpinan',
-            7 => 'Etos Kerja',
-        ];
+        // KEPUASAN PENGGUNA LULUSAN (DARI pertanyaan DENGAN metodejawaban = 1)
+        $pertanyaan = DB::table('pertanyaan')
+            ->where('kategori', 'pengguna_lulusan')
+            ->where('metodejawaban', 1)
+            ->pluck('isi_pertanyaan', 'id_pertanyaan');
 
         $kriteriaChartData = [];
-
-        foreach ($kriteria as $id => $label) {
+        foreach ($pertanyaan as $id => $label) {
             $jawaban = DB::table('jawaban')
                 ->select('jawaban', DB::raw('count(*) as total'))
                 ->where('id_pertanyaan', $id)
@@ -81,9 +79,9 @@ class AdminDashboardController extends Controller
             'profesiData',
             'instansiLabels',
             'instansiData',
-            'kriteriaChartData',
             'masaTunggu',
             'sebaranLingkup',
+            'kriteriaChartData'
         ));
     }
 
@@ -99,7 +97,7 @@ class AdminDashboardController extends Controller
         foreach ($tahunLulus as $tahun) {
             $alumniTahun = Alumni::whereYear('tgl_lulus', $tahun);
             $jumlahLulusan = $alumniTahun->count();
-            $jumlahTerlacak = (clone $alumniTahun)->whereNotNull('profesi')->count();
+            $jumlahTerlacak = (clone $alumniTahun)->whereNotNull('id_profesi')->count();
             $pengisiMasaTunggu = (clone $alumniTahun)->whereNotNull('tanggal_kerja_pertama')->count();
             $totalMasaTunggu = (clone $alumniTahun)->whereNotNull('tanggal_kerja_pertama')->sum('masa_tunggu');
             $rataRataMasaTunggu = $pengisiMasaTunggu > 0 ? $totalMasaTunggu / $pengisiMasaTunggu : 0;
@@ -117,106 +115,90 @@ class AdminDashboardController extends Controller
         return $masaTunggu;
     }
 
-    public function export_excel()
-    {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        public function export_excel()
+        {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
 
-        // Header
-        $sheet->fromArray([
-            ['No', 'Jenis Kemampuan', 'Sangat Baik (%)', 'Baik (%)', 'Cukup (%)', 'Kurang (%)', 'Sangat Kurang (%)']
-        ], null, 'A1');
+            // Header
+            $sheet->fromArray([
+                ['No', 'Jenis Kemampuan', 'Sangat Kurang (%)', 'Kurang (%)', 'Cukup (%)', 'Baik (%)', 'Sangat Baik (%)']
+            ], null, 'A1');
 
-        // Mapping ID Pertanyaan ke Nama Kemampuan
-        $kriteria = [
-            1 => 'Kerjasama Tim',
-            2 => 'Keahlian di bidang TI',
-            3 => 'Kemampuan berbahasa asing (Inggris)',
-            4 => 'Kemampuan berkomunikasi',
-            5 => 'Pengembangan diri',
-            6 => 'Kepemimpinan',
-            7 => 'Etos Kerja',
-        ];
+            $kriteria = DB::table('pertanyaan')
+                ->where('kategori', 'pengguna_lulusan')
+                ->where('metodejawaban', 1)
+                ->pluck('isi_pertanyaan', 'id_pertanyaan');
 
-        $kategoriLabel = [
-            5 => 'Sangat Baik',
-            4 => 'Baik',
-            3 => 'Cukup',
-            2 => 'Kurang',
-            1 => 'Sangat Kurang',
-        ];
+            $kategoriLabel = [
+                1 => 'Sangat Kurang',
+                2 => 'Kurang',
+                3 => 'Cukup',
+                4 => 'Baik',
+                5 => 'Sangat Baik',
+            ];
 
-        $rataRata = [
-            'Sangat Baik' => 0,
-            'Baik' => 0,
-            'Cukup' => 0,
-            'Kurang' => 0,
-            'Sangat Kurang' => 0,
-        ];
+            $rataRata = array_fill_keys(array_values($kategoriLabel), 0);
 
-        $row = 2;
-        $no = 1;
-        $jumlahKemampuan = count($kriteria);
+            $row = 2;
+            $no = 1;
+            $jumlahKemampuan = $kriteria->count();
 
-        foreach ($kriteria as $idPertanyaan => $namaKemampuan) {
-            $total = DB::table('jawaban')
-                ->where('id_pertanyaan', $idPertanyaan)
-                ->count();
+            foreach ($kriteria as $idPertanyaan => $namaKemampuan) {
+                $total = DB::table('jawaban')->where('id_pertanyaan', $idPertanyaan)->count();
+                $persentase = [];
 
-            $persentase = [];
+                foreach ($kategoriLabel as $nilai => $label) {
+                    $jumlah = DB::table('jawaban')
+                        ->where('id_pertanyaan', $idPertanyaan)
+                        ->where('jawaban', $nilai)
+                        ->count();
 
-            foreach ($kategoriLabel as $nilai => $label) {
-                $jumlah = DB::table('jawaban')
-                    ->where('id_pertanyaan', $idPertanyaan)
-                    ->where('jawaban', $nilai)
-                    ->count();
+                    $persen = $total > 0 ? round(($jumlah / $total) * 100, 2) : 0;
+                    $persentase[$label] = $persen;
+                    $rataRata[$label] += $persen;
+                }
 
-                $persen = $total > 0 ? round(($jumlah / $total) * 100, 2) : 0;
-                $persentase[] = $persen;
-
-                // Tambahkan ke total rata-rata
-                $rataRata[$label] += $persen;
+                $sheet->fromArray([
+                    $no++, $namaKemampuan,
+                    $persentase['Sangat Kurang'],
+                    $persentase['Kurang'],
+                    $persentase['Cukup'],
+                    $persentase['Baik'],
+                    $persentase['Sangat Baik'],
+                ], null, 'A' . $row++);
             }
 
             $sheet->fromArray([
-                $no++,
-                $namaKemampuan,
-                $persentase[0], // Sangat Baik
-                $persentase[1], // Baik
-                $persentase[2], // Cukup
-                $persentase[3], // Kurang
-                $persentase[4], // Sangat Kurang
-            ], null, 'A' . $row++);
+                '', 'Jumlah Rata-Rata',
+                round($rataRata['Sangat Kurang'] / $jumlahKemampuan, 2),
+                round($rataRata['Kurang'] / $jumlahKemampuan, 2),
+                round($rataRata['Cukup'] / $jumlahKemampuan, 2),
+                round($rataRata['Baik'] / $jumlahKemampuan, 2),
+                round($rataRata['Sangat Baik'] / $jumlahKemampuan, 2),
+            ], null, 'A' . $row);
+
+            // Styling border dan center
+            $sheet->getStyle("A1:G$row")->applyFromArray([
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ]);
+
+            foreach (range('A', 'G') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            $filename = 'Kepuasan_Pengguna_Lulusan_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header("Content-Disposition: attachment;filename=\"$filename\"");
+            header('Cache-Control: max-age=0');
+            $writer->save('php://output');
+            exit;
         }
 
-        // Rata-rata
-        $sheet->fromArray([
-            '',
-            'Jumlah Rata-Rata',
-            round($rataRata['Sangat Baik'] / $jumlahKemampuan, 2),
-            round($rataRata['Baik'] / $jumlahKemampuan, 2),
-            round($rataRata['Cukup'] / $jumlahKemampuan, 2),
-            round($rataRata['Kurang'] / $jumlahKemampuan, 2),
-            round($rataRata['Sangat Kurang'] / $jumlahKemampuan, 2),
-        ], null, 'A' . $row);
-
-        // Auto size kolom
-        foreach (range('A', 'G') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        $filename = 'Kepuasan Pengguna Lulusan ' . now()->format('Y-m-d H-i-s') . '.xlsx';
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment;filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');
-        exit;
-    }
-
-    protected function getSebaranLingkupProfesiData()
+      protected function getSebaranLingkupProfesiData()
     {
         $tahunLulus = Alumni::selectRaw('YEAR(tgl_lulus) as tahun')
             ->whereNotNull('tgl_lulus')
@@ -225,17 +207,21 @@ class AdminDashboardController extends Controller
             ->pluck('tahun');
 
         $data = [];
-
         foreach ($tahunLulus as $tahun) {
             $alumniTahun = Alumni::with('instansi')->whereYear('tgl_lulus', $tahun);
-
             $jumlahLulusan = $alumniTahun->count();
-            $terlacak = (clone $alumniTahun)->whereNotNull('profesi')->count();
-            $bidangInfokom = (clone $alumniTahun)->where('kategori_profesi', 'Infokom')->count();
-            $bidangNonInfokom = (clone $alumniTahun)->where('kategori_profesi', 'Non Infokom')->count();
-            $internasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Internasional'))->count();
+            $terlacak = (clone $alumniTahun)->whereNotNull('id_profesi')->count();
+
+            $alumniJoinProfesi = DB::table('alumni')
+                ->join('profesi', 'alumni.id_profesi', '=', 'profesi.id_profesi')
+                ->whereYear('tgl_lulus', $tahun);
+
+            $bidangInfokom = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Infokom')->count();
+            $bidangNonInfokom = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Non Infokom')->count();
+            $wirausaha = (clone $alumniJoinProfesi)->where('profesi.kategori_profesi', 'Wirausaha')->count();
+
+            $internasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Multinasional'))->count();
             $nasional = (clone $alumniTahun)->whereHas('instansi', fn($q) => $q->where('skala_instansi', 'Nasional'))->count();
-            $wirausaha = (clone $alumniTahun)->where('kategori_profesi', 'Wirausaha')->count();
 
             $data[] = [
                 'tahun' => $tahun,
@@ -251,4 +237,114 @@ class AdminDashboardController extends Controller
 
         return $data;
     }
+       public function exportLingkupKerja()
+        {
+            $data = $this->getSebaranLingkupProfesiData();
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Header Baris 1
+            $sheet->setCellValue('A1', 'Tahun Lulus');
+            $sheet->setCellValue('B1', 'Jumlah Lulusan');
+            $sheet->setCellValue('C1', 'Jumlah Terlacak');
+            $sheet->setCellValue('D1', 'Kesesuaian Profesi');
+            $sheet->mergeCells('D1:E1');
+            $sheet->setCellValue('F1', 'Lingkup Tempat Kerja');
+            $sheet->mergeCells('F1:H1');
+
+            // Header Baris 2
+            $sheet->setCellValue('D2', 'Infokom');
+            $sheet->setCellValue('E2', 'Non Infokom');
+            $sheet->setCellValue('F2', 'Internasional');
+            $sheet->setCellValue('G2', 'Nasional');
+            $sheet->setCellValue('H2', 'Wirausaha');
+
+            // Data Rows
+            $rowIndex = 3;
+            foreach ($data as $row) {
+                $sheet->fromArray([
+                    $row['tahun'],
+                    $row['jumlah_lulusan'],
+                    $row['terlacak'],
+                    $row['infokom'],
+                    $row['non_infokom'],
+                    $row['internasional'],
+                    $row['nasional'],
+                    $row['wirausaha'],
+                ], null, 'A' . $rowIndex++);
+            }
+
+            $lastRow = $rowIndex - 1;
+
+            // Border dan Alignment
+            $sheet->getStyle("A1:H$lastRow")->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                    ],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+            ]);
+
+            // Auto-size kolom
+            foreach (range('A', 'H') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            $filename = 'Sebaran_Lingkup_Kerja_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header("Content-Disposition: attachment;filename=\"$filename\"");
+            header('Cache-Control: max-age=0');
+            $writer->save('php://output');
+            exit;
+        }
+        public function exportMasaTunggu()
+        {
+            $data = $this->getMasaTungguTableData();
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Header
+            $sheet->fromArray([[
+                'Tahun Lulus', 'Jumlah Lulusan', 'Jumlah Terlacak', 'Rata-rata Masa Tunggu (bulan)'
+            ]], null, 'A1');
+
+            $rowIndex = 2;
+            foreach ($data as $row) {
+                $sheet->fromArray([
+                    $row['tahun_lulus'],
+                    $row['jumlah_lulusan'],
+                    $row['jumlah_terlacak'],
+                    number_format($row['rata_rata_masa_tunggu'], 2)
+                ], null, 'A' . $rowIndex++);
+            }
+
+            $lastRow = $rowIndex - 1;
+
+            // Styling border dan center
+            $sheet->getStyle("A1:D$lastRow")->applyFromArray([
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ]);
+
+            foreach (range('A', 'D') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            $filename = 'Masa_Tunggu_Alumni_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header("Content-Disposition: attachment;filename=\"$filename\"");
+            header('Cache-Control: max-age=0');
+            $writer->save('php://output');
+            exit;
+        }
 }
