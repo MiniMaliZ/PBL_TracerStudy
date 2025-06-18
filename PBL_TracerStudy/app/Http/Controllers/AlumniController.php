@@ -184,7 +184,8 @@ class AlumniController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            // Base validation rules
+            $rules = [
                 // Field wajib (required)
                 'nim' => 'required|unique:alumni,nim|numeric|digits_between:8,15',
                 'nama_alumni' => 'required|string|max:255',
@@ -198,28 +199,55 @@ class AlumniController extends Controller
                 'tanggal_kerja_pertama' => 'nullable|date',
                 'tanggal_mulai_instansi' => 'nullable|date',
                 'id_profesi' => 'nullable|exists:profesi,id_profesi',
-                'nama_atasan' => 'nullable|string|max:255',
-                'jabatan_atasan' => 'nullable|string|max:255',
-                'email_atasan' => 'nullable|email|max:255',
+
+                // Field instansi
                 'nama_instansi' => 'nullable|string|max:255',
                 'jenis_instansi' => 'nullable|in:Pendidikan Tinggi,Instansi Pemerintah,BUMN,Perusahaan Swasta',
                 'skala_instansi' => 'nullable|in:Wirausaha,Nasional,Multinasional',
                 'lokasi_instansi' => 'nullable|string|max:255',
                 'no_hp_instansi' => 'nullable|numeric|digits_between:10,15',
-            ]);
+            ];
+
+            // Custom messages
+            $messages = [
+                'nama_atasan.required_with' => 'Nama atasan wajib diisi jika salah satu field atasan lainnya diisi.',
+                'jabatan_atasan.required_with' => 'Jabatan atasan wajib diisi jika salah satu field atasan lainnya diisi.',
+                'email_atasan.required_with' => 'Email atasan wajib diisi jika salah satu field atasan lainnya diisi.',
+                'email_atasan.email' => 'Format email atasan tidak valid.',
+            ];
+
+            // Conditional validation untuk field atasan
+            $hasAnyAtasanField = $request->filled('nama_atasan') ||
+                $request->filled('jabatan_atasan') ||
+                $request->filled('email_atasan');
+
+            if ($hasAnyAtasanField) {
+                // Jika salah satu field atasan diisi, maka semua field atasan harus diisi
+                $rules['nama_atasan'] = 'required_with:jabatan_atasan,email_atasan|string|max:255';
+                $rules['jabatan_atasan'] = 'required_with:nama_atasan,email_atasan|string|max:255';
+                $rules['email_atasan'] = 'required_with:nama_atasan,jabatan_atasan|email|max:255';
+            } else {
+                // Jika tidak ada field atasan yang diisi, maka semua opsional
+                $rules['nama_atasan'] = 'nullable|string|max:255';
+                $rules['jabatan_atasan'] = 'nullable|string|max:255';
+                $rules['email_atasan'] = 'nullable|email|max:255';
+            }
+
+            $request->validate($rules, $messages);
 
             // Inisialisasi ID untuk relasi
             $id_pengguna_lulusan = null;
             $id_instansi = null;
 
             // ===== HANDLE PENGGUNA LULUSAN =====
-            $hasAtasanData = $request->filled('nama_atasan') ||
-                $request->filled('jabatan_atasan') ||
+            // Cek apakah SEMUA field atasan terisi (setelah validasi, jika ada salah satu maka semua harus terisi)
+            $hasCompleteAtasanData = $request->filled('nama_atasan') &&
+                $request->filled('jabatan_atasan') &&
                 $request->filled('email_atasan');
 
-            if ($hasAtasanData) {
+            if ($hasCompleteAtasanData) {
                 $penggunaLulusan = PenggunaLulusan::updateOrCreate(
-                    ['email_atasan' => $request->email_atasan ?: 'temp_' . time()],
+                    ['email_atasan' => $request->email_atasan],
                     [
                         'nama_atasan' => $request->nama_atasan,
                         'jabatan_atasan' => $request->jabatan_atasan,
@@ -277,6 +305,8 @@ class AlumniController extends Controller
             ]);
 
             return redirect()->route('alumni.index')->with('success', 'Data alumni berhasil ditambahkan.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Error: ' . $e->getMessage()])->withInput();
         }
@@ -295,7 +325,8 @@ class AlumniController extends Controller
     public function update(Request $request, $nim)
     {
         try {
-            $request->validate([
+            // Base validation rules
+            $rules = [
                 'nama_alumni' => 'required|max:100',
                 'id_prodi' => 'required|exists:prodi,id_prodi',
                 'tgl_lulus' => 'required|date',
@@ -305,15 +336,39 @@ class AlumniController extends Controller
                 'email' => 'nullable|email',
                 'no_hp' => 'nullable|numeric|digits_between:10,15',
                 'id_profesi' => 'nullable|exists:profesi,id_profesi',
-                'nama_atasan' => 'nullable|string|max:255',
-                'jabatan_atasan' => 'nullable|string|max:255',
-                'email_atasan' => 'nullable|email',
                 'nama_instansi' => 'nullable|max:100',
                 'jenis_instansi' => 'nullable|in:Pendidikan Tinggi,Instansi Pemerintah,BUMN,Perusahaan Swasta',
                 'skala_instansi' => 'nullable|in:Wirausaha,Nasional,Multinasional',
                 'lokasi_instansi' => 'nullable|string|max:255',
                 'no_hp_instansi' => 'nullable|numeric|digits_between:10,15',
-            ]);
+            ];
+
+            // Custom messages
+            $messages = [
+                'nama_atasan.required_with' => 'Nama atasan wajib diisi jika salah satu field atasan lainnya diisi.',
+                'jabatan_atasan.required_with' => 'Jabatan atasan wajib diisi jika salah satu field atasan lainnya diisi.',
+                'email_atasan.required_with' => 'Email atasan wajib diisi jika salah satu field atasan lainnya diisi.',
+                'email_atasan.email' => 'Format email atasan tidak valid.',
+            ];
+
+            // Conditional validation untuk field atasan
+            $hasAnyAtasanField = $request->filled('nama_atasan') || 
+                                $request->filled('jabatan_atasan') || 
+                                $request->filled('email_atasan');
+
+            if ($hasAnyAtasanField) {
+                // Jika salah satu field atasan diisi, maka semua field atasan harus diisi
+                $rules['nama_atasan'] = 'required_with:jabatan_atasan,email_atasan|string|max:255';
+                $rules['jabatan_atasan'] = 'required_with:nama_atasan,email_atasan|string|max:255';
+                $rules['email_atasan'] = 'required_with:nama_atasan,jabatan_atasan|email|max:255';
+            } else {
+                // Jika tidak ada field atasan yang diisi, maka semua opsional
+                $rules['nama_atasan'] = 'nullable|string|max:255';
+                $rules['jabatan_atasan'] = 'nullable|string|max:255';
+                $rules['email_atasan'] = 'nullable|email|max:255';
+            }
+
+            $request->validate($rules, $messages);
 
             $alumni = Alumni::findOrFail($nim);
 
@@ -322,13 +377,19 @@ class AlumniController extends Controller
             $id_instansi = $alumni->id_instansi;
 
             // ===== HANDLE PENGGUNA LULUSAN =====
-            $hasAtasanData = $request->filled('nama_atasan') ||
-                $request->filled('jabatan_atasan') ||
-                $request->filled('email_atasan');
+            // Cek apakah SEMUA field atasan terisi
+            $hasCompleteAtasanData = $request->filled('nama_atasan') && 
+                                    $request->filled('jabatan_atasan') && 
+                                    $request->filled('email_atasan');
 
-            if ($hasAtasanData) {
+            // Cek apakah SEMUA field atasan kosong (untuk clear data)
+            $allAtasanEmpty = !$request->filled('nama_atasan') && 
+                             !$request->filled('jabatan_atasan') && 
+                             !$request->filled('email_atasan');
+
+            if ($hasCompleteAtasanData) {
                 $penggunaLulusan = PenggunaLulusan::updateOrCreate(
-                    ['email_atasan' => $request->email_atasan ?: 'temp_' . time()],
+                    ['email_atasan' => $request->email_atasan],
                     [
                         'nama_atasan' => $request->nama_atasan,
                         'jabatan_atasan' => $request->jabatan_atasan,
@@ -336,7 +397,8 @@ class AlumniController extends Controller
                     ]
                 );
                 $id_pengguna_lulusan = $penggunaLulusan->id_pengguna_lulusan;
-            } elseif ($request->input('nama_atasan') === '' && $request->input('jabatan_atasan') === '' && $request->input('email_atasan') === '') {
+            } elseif ($allAtasanEmpty) {
+                // Jika semua field atasan dikosongkan, hapus relasi
                 $id_pengguna_lulusan = null;
             }
 
@@ -346,6 +408,12 @@ class AlumniController extends Controller
                 $request->filled('skala_instansi') ||
                 $request->filled('lokasi_instansi') ||
                 $request->filled('no_hp_instansi');
+
+            $allInstansiEmpty = !$request->filled('nama_instansi') && 
+                               !$request->filled('jenis_instansi') && 
+                               !$request->filled('skala_instansi') && 
+                               !$request->filled('lokasi_instansi') && 
+                               !$request->filled('no_hp_instansi');
 
             if ($hasInstansiData) {
                 $namaInstansi = $request->nama_instansi ?: 'Unknown_' . time();
@@ -361,7 +429,8 @@ class AlumniController extends Controller
                     ]
                 );
                 $id_instansi = $instansi->id_instansi;
-            } elseif ($request->input('nama_instansi') === '' && $request->input('jenis_instansi') === '' && $request->input('skala_instansi') === '' && $request->input('lokasi_instansi') === '' && $request->input('no_hp_instansi') === '') {
+            } elseif ($allInstansiEmpty) {
+                // Jika semua field instansi dikosongkan, hapus relasi
                 $id_instansi = null;
             }
 
@@ -389,6 +458,8 @@ class AlumniController extends Controller
             ]);
 
             return redirect()->route('alumni.index')->with('success', 'Data alumni berhasil diperbarui.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Error: ' . $e->getMessage()])->withInput();
         }

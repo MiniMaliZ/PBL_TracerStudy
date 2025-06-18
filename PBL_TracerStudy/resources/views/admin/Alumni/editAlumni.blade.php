@@ -38,10 +38,12 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="id_prodi">Program Studi</label>
-                            <select name="id_prodi" id="id_prodi" class="form-control @error('id_prodi') is-invalid @enderror" required>
+                            <select name="id_prodi" id="id_prodi"
+                                class="form-control @error('id_prodi') is-invalid @enderror" required>
                                 <option value="">Pilih Program Studi</option>
-                                @foreach($prodis as $prodi)
-                                    <option value="{{ $prodi->id_prodi }}" {{ $alumni->id_prodi == $prodi->id_prodi ? 'selected' : '' }}>
+                                @foreach ($prodis as $prodi)
+                                    <option value="{{ $prodi->id_prodi }}"
+                                        {{ $alumni->id_prodi == $prodi->id_prodi ? 'selected' : '' }}>
                                         {{ $prodi->nama_prodi }} ({{ $prodi->jurusan }})
                                     </option>
                                 @endforeach
@@ -123,10 +125,11 @@
                             <label for="id_profesi">Profesi</label>
                             <select name="id_profesi" id="id_profesi" class="form-control">
                                 <option value="">Pilih Profesi</option>
-                                @foreach($profesis->groupBy('kategori_profesi') as $kategori => $profesiGroup)
+                                @foreach ($profesis->groupBy('kategori_profesi') as $kategori => $profesiGroup)
                                     <optgroup label="{{ $kategori }}">
-                                        @foreach($profesiGroup as $profesi)
-                                            <option value="{{ $profesi->id_profesi }}" {{ $alumni->id_profesi == $profesi->id_profesi ? 'selected' : '' }}>
+                                        @foreach ($profesiGroup as $profesi)
+                                            <option value="{{ $profesi->id_profesi }}"
+                                                {{ $alumni->id_profesi == $profesi->id_profesi ? 'selected' : '' }}>
                                                 {{ $profesi->nama_profesi }}
                                             </option>
                                         @endforeach
@@ -137,34 +140,57 @@
                     </div>
                 </div>
 
-                <h5 class="mt-4 mb-3">Detail Pengguna Lulusan</h5>
+                <h5 class="mt-4 mb-3">Detail Pengguna Lulusan <span class="text-muted">(Opsional - Jika diisi salah satu,
+                        harus diisi semua)</span></h5>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="nama_atasan">Nama Atasan</label>
-                            <input type="text" name="nama_atasan" id="nama_atasan" class="form-control"
+                            <label for="nama_atasan">Nama Atasan <span class="conditional-required"
+                                    style="display: none; color: red;">*</span></label>
+                            <input type="text" name="nama_atasan" id="nama_atasan"
+                                class="form-control atasan-field @error('nama_atasan') is-invalid @enderror"
                                 value="{{ $alumni->penggunaLulusan->nama_atasan ?? '' }}"
                                 placeholder="Masukkan nama atasan langsung">
+                            @error('nama_atasan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="jabatan_atasan">Jabatan Atasan</label>
-                            <input type="text" name="jabatan_atasan" id="jabatan_atasan" class="form-control"
+                            <label for="jabatan_atasan">Jabatan Atasan <span class="conditional-required"
+                                    style="display: none; color: red;">*</span></label>
+                            <input type="text" name="jabatan_atasan" id="jabatan_atasan"
+                                class="form-control atasan-field @error('jabatan_atasan') is-invalid @enderror"
                                 value="{{ $alumni->penggunaLulusan->jabatan_atasan ?? '' }}"
                                 placeholder="Masukkan jabatan atasan, contoh: Manager IT">
+                            @error('jabatan_atasan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="email_atasan">Email Atasan</label>
-                            <input type="email" name="email_atasan" id="email_atasan" class="form-control"
+                            <label for="email_atasan">Email Atasan <span class="conditional-required"
+                                    style="display: none; color: red;">*</span></label>
+                            <input type="email" name="email_atasan" id="email_atasan"
+                                class="form-control atasan-field @error('email_atasan') is-invalid @enderror"
                                 value="{{ $alumni->penggunaLulusan->email_atasan ?? '' }}"
                                 placeholder="Masukkan email atasan, contoh: manager@perusahaan.com">
+                            @error('email_atasan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
+                </div>
+
+                {{-- Alert untuk informasi validasi --}}
+                <div class="alert alert-warning atasan-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Perhatian:</strong> Jika Anda mengisi salah satu field atasan, maka semua field atasan (Nama,
+                    Jabatan, dan Email) harus diisi lengkap.
                 </div>
 
                 <h5 class="mt-4 mb-3">Detail Instansi</h5>
@@ -242,4 +268,76 @@
             </form>
         </div>
     </div>
+
+    {{-- JavaScript untuk validasi conditional --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const atasanFields = document.querySelectorAll('.atasan-field');
+            const conditionalRequired = document.querySelectorAll('.conditional-required');
+            const atasanWarning = document.querySelector('.atasan-warning');
+
+            function checkAtasanFields() {
+                let hasValue = false;
+
+                // Cek apakah ada field yang terisi
+                atasanFields.forEach(field => {
+                    if (field.value.trim() !== '') {
+                        hasValue = true;
+                    }
+                });
+
+                // Show/hide required indicator dan warning
+                conditionalRequired.forEach(indicator => {
+                    indicator.style.display = hasValue ? 'inline' : 'none';
+                });
+
+                if (atasanWarning) {
+                    atasanWarning.style.display = hasValue ? 'block' : 'none';
+                }
+
+                // Add/remove required attribute
+                atasanFields.forEach(field => {
+                    if (hasValue) {
+                        field.setAttribute('required', 'required');
+                        field.classList.add('required-conditional');
+                    } else {
+                        field.removeAttribute('required');
+                        field.classList.remove('required-conditional');
+                    }
+                });
+            }
+
+            // Event listeners untuk semua field atasan
+            atasanFields.forEach(field => {
+                field.addEventListener('input', checkAtasanFields);
+                field.addEventListener('blur', checkAtasanFields);
+            });
+
+            // Initial check saat halaman load
+            checkAtasanFields();
+
+            // Form validation sebelum submit
+            document.querySelector('form').addEventListener('submit', function(e) {
+                // Check if any atasan field is filled but not all
+                const filledFields = Array.from(atasanFields).filter(field => field.value.trim() !== '');
+                if (filledFields.length > 0 && filledFields.length < atasanFields.length) {
+                    e.preventDefault();
+                    alert(
+                        'Jika mengisi data atasan, semua field atasan (Nama, Jabatan, dan Email) harus diisi lengkap.');
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    {{-- CSS untuk styling conditional required --}}
+    <style>
+        .required-conditional {
+            border-left: 3px solid #ffc107 !important;
+        }
+
+        .atasan-warning {
+            border-left: 4px solid #ffc107;
+        }
+    </style>
 @endsection
