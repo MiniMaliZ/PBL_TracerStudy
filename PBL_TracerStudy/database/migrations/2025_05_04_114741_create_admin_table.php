@@ -9,6 +9,7 @@ return new class extends Migration {
         Schema::create('admin', function (Blueprint $table) {
             $table->id('id_admin');
             $table->string('username', 50);
+            $table->string('email')->index();
             $table->string('password');
             $table->string('nama', 100);
         });
