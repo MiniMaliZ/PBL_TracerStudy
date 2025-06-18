@@ -96,6 +96,7 @@ Route::get('/admin/{id}/edit', [AdminController::class, 'edit'])->name('admin.ed
 Route::put('/admin/{id}', [AdminController::class, 'update'])->name('admin.update');
 Route::delete('/admin/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
 
+
 Route::prefix('tracerstudy')->group(function () {
     //landing page
     Route::get('/', [TCFormController::class, 'index'])->name("landingpage");
