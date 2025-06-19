@@ -16,11 +16,13 @@ class Admin extends Authenticatable implements CanResetPassword
     protected $primaryKey = 'id_admin';
     public $timestamps = false;
 
-    protected $fillable = ['username', 'email', 'password', 'nama'];
+    protected $fillable = ['username', 'email', 'password', 'nama', 'role'];
+    
     protected $hidden = [
         'password',
         'remember_token',
     ];
+    
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -29,5 +31,21 @@ class Admin extends Authenticatable implements CanResetPassword
     public function pertanyaan()
     {
         return $this->hasMany(Pertanyaan::class, 'created_by', 'id_admin');
+    }
+
+    // Helper methods untuk role
+    public function isSuperAdmin()
+    {
+        return $this->role === 'super_admin';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function canManageAdmins()
+    {
+        return $this->isSuperAdmin();
     }
 }

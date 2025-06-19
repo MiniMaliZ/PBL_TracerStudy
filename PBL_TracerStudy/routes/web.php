@@ -85,18 +85,14 @@ Route::get('/pengguna-lulusan/export', [PenggunaLulusanController::class, 'expor
 Route::get('/pengguna-lulusan/export-sudah-survey', [PenggunaLulusanController::class, 'exportSudahIsiSurvey'])->name('penggunaLulusan.exportSudahIsiSurvey');
 
 // Routes untuk tabel Admin
-Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-Route::get('/admin/create', [AdminController::class, 'create'])->name('admin.create');
-Route::post('/admin', [AdminController::class, 'store'])->name('admin.store');
-Route::get('/admin/{id}/edit', [AdminController::class, 'edit'])->name('admin.edit');
-Route::put('/admin/{id}', [AdminController::class, 'update'])->name('admin.update');
-Route::delete('/admin/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
-// Forgot Password Admin
-
-
-
-
-
+Route::middleware(['auth', 'super_admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    Route::get('/admin/create', [AdminController::class, 'create'])->name('admin.create');
+    Route::post('/admin', [AdminController::class, 'store'])->name('admin.store');
+    Route::get('/admin/{id}/edit', [AdminController::class, 'edit'])->name('admin.edit');
+    Route::put('/admin/{id}', [AdminController::class, 'update'])->name('admin.update');
+    Route::delete('/admin/{id}', [AdminController::class, 'destroy'])->name('admin.destroy');
+});
 
 Route::prefix('tracerstudy')->group(function () {
     //landing page

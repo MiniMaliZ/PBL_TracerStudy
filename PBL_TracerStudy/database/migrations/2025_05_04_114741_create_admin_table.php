@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('email')->index();
             $table->string('password');
             $table->string('nama', 100);
+            $table->enum('role', ['admin', 'super_admin'])->default('admin');
         });
     }
 

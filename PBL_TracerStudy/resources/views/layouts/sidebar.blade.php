@@ -4,8 +4,8 @@
     id="sidenav-main">
     <div class="sidenav-header">
         <a class="navbar-brand px-4 py-3 m-0" href="#">
-            <img src="{{ asset('images/TRACER STUDY LOGO-black.png') }}" class="navbar-brand-img"
-                width="35" height="35" alt="main_logo">
+            <img src="{{ asset('images/TRACER STUDY LOGO-black.png') }}" class="navbar-brand-img" width="35"
+                height="35" alt="main_logo">
             <span class="ms-1 text-sm text-dark">Tracer Study</span>
         </a>
     </div>
@@ -48,13 +48,15 @@
                     <span class="nav-link-text ms-1">Pengguna Lulusan</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ Request::is('admin*') ? 'active bg-gradient-dark text-white' : '' }}"
-                    href="{{ route('admin.index') }}">
-                    <i class="material-symbols-rounded opacity-5">admin_panel_settings</i>
-                    <span class="nav-link-text ms-1">Admin</span>
-                </a>
-            </li>
+            <!-- hanya super admin yang bisa akses jadi disembunyikan -->
+            @if (Auth::user() && Auth::user()->canManageAdmins())
+                <li class="nav-item {{ request()->is('admin*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.index') }}">
+                        <i class="material-symbols-rounded opacity-5">admin_panel_settings</i>
+                        <span>Kelola Admin</span>
+                    </a>
+                </li>
+            @endif
         </ul>
     </div>
 </aside>
