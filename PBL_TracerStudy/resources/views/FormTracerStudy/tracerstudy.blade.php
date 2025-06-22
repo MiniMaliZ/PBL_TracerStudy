@@ -277,7 +277,8 @@
                     <div class="col-md-6">
                         <label for="tahun_masuk" class="form-label">Tahun Angkatan</label>
                         <input type="number" class="form-control" id="tahun_masuk" name="tahun_masuk"
-                            placeholder="Angkatan" required>
+                            placeholder="Angkatan" required oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            min="2000" max="3000">
                     </div>
                     <div class="col-md-6">
                         <label for="tanggal_kerja_pertama" class="form-label">Tanggal Pertama Bekerja</label>
@@ -342,7 +343,7 @@
                             <option value="non infokom">Non Infokom</option>
                         </select>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <label for="profesi" class="form-label">Profesi</label>
                         <input type="text" class="form-control" id="profesi" name="profesi"

@@ -561,7 +561,7 @@
             <div class="container">
                 <div class="text-center mb-4" data-aos="fade-up" data-aos-duration="800">
                     <h2 class="section-title">Mekanisme Tracer Study</h2>
-                    <p class="section-subtitle">Proses sederhana dalam 4 langkah mudah</p>
+                    <p class="section-subtitle">Proses sederhana dalam 4 langkah </p>
                 </div>
                 
                 <div class="row g-3">
@@ -634,9 +634,7 @@
                                     </p>
                                 </div>
                                 <div class="col-lg-4 text-center">
-                                    <div class="feature-icon mx-auto">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
+                                        <img src="{{ asset('landingpageimg/Employee doing risk management for company.png') }}" alt="Data Icon" style="width: 250px; height: 250px;">
                                 </div>
                             </div>
                         </div>
@@ -659,7 +657,7 @@
                                 Bergabunglah dengan ribuan alumni lainnya dalam membangun masa depan pendidikan yang lebih baik
                             </p>
                             <a href="{{ route('form.opsi') }}" class="btn-fill-form">
-                                <i class="fas fa-rocket"></i>
+                                <i class="fas fa-edit"></i>
                                 Mulai Isi Formulir
                             </a>
                         </div>
