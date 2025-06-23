@@ -154,13 +154,16 @@
 <body>
 
     <!-- Header -->
-    <div class="logo-title">
+<a href="{{ url('/tracerstudy') }}" class="text-decoration-none text-dark">
+    <div class="logo-title d-flex align-items-center">
         <img src="{{ asset('landingpageimg/Logo_Polinema 1.png') }}" alt="Logo Polinema" />
-        <div>
+        <div class="ms-2">
             <h5 class="mb-0">TRACER STUDY</h5>
             <small>Politeknik Negeri Malang</small>
         </div>
     </div>
+</a>
+
 
     <main>
         <!-- Card Section -->
