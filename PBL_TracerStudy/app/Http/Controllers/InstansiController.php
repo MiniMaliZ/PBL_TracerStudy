@@ -34,7 +34,7 @@ class InstansiController extends Controller
             'jenis_instansi' => 'required|in:Pendidikan Tinggi,Instansi Pemerintah,BUMN,Perusahaan Swasta',
             'skala_instansi' => 'required|in:Wirausaha,Nasional,Multinasional',
             'lokasi_instansi' => 'required|max:100',
-            'no_hp_instansi' => 'required|max:20',
+            'no_hp_instansi' => 'required|min:10|max:13',
         ]);
 
         Instansi::create($request->all());
@@ -70,7 +70,7 @@ class InstansiController extends Controller
             'jenis_instansi' => 'required|in:Pendidikan Tinggi,Instansi Pemerintah,BUMN,Perusahaan Swasta',
             'skala_instansi' => 'required|in:Wirausaha,Nasional,Multinasional',
             'lokasi_instansi' => 'required|max:100',
-            'no_hp_instansi' => 'required|max:20',
+            'no_hp_instansi' => 'required|min:10|max:20',
         ]);
 
         $instansi = Instansi::findOrFail($id);
